@@ -2,7 +2,7 @@
 
 ![The Bear Cave banner](./images/banner-p5.svg)
 
-Welcome to my den. This site collects together and shows off the prototyping work I'm doing for CART253 — every project, sketch, and experiment I build over the course of the semester lives here.
+Welcome to my den. This site collects together and shows off the prototyping work I'm doing for CART253  every project, sketch, and experiment I build over the course of the semester lives here.
 
 ## Links
 
@@ -10,4 +10,4 @@ Welcome to my den. This site collects together and shows off the prototyping wor
 
 ## Prototypes
 
-Nothing posted yet — check back soon.
+Nothing posted yet - Bear is hibernating, check back soon.
