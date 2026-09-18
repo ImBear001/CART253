@@ -10,4 +10,4 @@ I hope future visitors to this site get a sense of my process, not just finished
 
 Screenshot of the site so far:
 
-![Screenshot of The Bear Cave homepage](./images/banner-p5.svg)
+![Screenshot of The Bear Cave homepage](./images/screenshot.png)
