@@ -1,0 +1,82 @@
+<svg width="1200" height="300" viewBox="0 0 1200 300" xmlns="http://www.w3.org/2000/svg">
+  <!-- p5.js canvas look: flat background, thin border, monospace-ish label -->
+  <rect x="0" y="0" width="1200" height="300" fill="#1e1e1e"/>
+  <rect x="4" y="4" width="1192" height="292" fill="none" stroke="#444444" stroke-width="2"/>
+
+  <!-- faint grid, like a sketch canvas -->
+  <g stroke="#2a2a2a" stroke-width="1">
+    <line x1="100" y1="0" x2="100" y2="300"/>
+    <line x1="200" y1="0" x2="200" y2="300"/>
+    <line x1="300" y1="0" x2="300" y2="300"/>
+    <line x1="400" y1="0" x2="400" y2="300"/>
+    <line x1="500" y1="0" x2="500" y2="300"/>
+    <line x1="600" y1="0" x2="600" y2="300"/>
+    <line x1="700" y1="0" x2="700" y2="300"/>
+    <line x1="800" y1="0" x2="800" y2="300"/>
+    <line x1="900" y1="0" x2="900" y2="300"/>
+    <line x1="1000" y1="0" x2="1000" y2="300"/>
+    <line x1="1100" y1="0" x2="1100" y2="300"/>
+    <line x1="0" y1="75" x2="1200" y2="75"/>
+    <line x1="0" y1="150" x2="1200" y2="150"/>
+    <line x1="0" y1="225" x2="1200" y2="225"/>
+  </g>
+
+  <!-- simple dot "stars" like ellipse() calls -->
+  <g fill="#ffffff">
+    <circle cx="90" cy="40" r="2"/>
+    <circle cx="230" cy="30" r="2"/>
+    <circle cx="330" cy="55" r="2"/>
+    <circle cx="60" cy="100" r="2"/>
+    <circle cx="960" cy="35" r="2"/>
+    <circle cx="1060" cy="60" r="2"/>
+    <circle cx="1140" cy="40" r="2"/>
+    <circle cx="1000" cy="95" r="2"/>
+  </g>
+
+  <!-- moon: plain circle(), like p5 default fill -->
+  <circle cx="1080" cy="65" r="28" fill="#fdf6e3"/>
+
+  <!-- ground: rect() -->
+  <rect x="0" y="240" width="1200" height="60" fill="#2f2f2f"/>
+
+  <!-- cave mouth: arc()-style shape made from ellipse + rect -->
+  <path d="M440,300 C440,170 510,130 600,130 C690,130 760,170 760,300 Z" fill="#0d0d0d" stroke="#555555" stroke-width="3"/>
+
+  <!-- campfire: two triangle()-ish flames + rect log -->
+  <rect x="580" y="278" width="40" height="10" fill="#4a3524"/>
+  <polygon points="592,278 598,250 604,278" fill="#ff9f43"/>
+  <polygon points="602,278 608,246 614,278" fill="#ffd27f"/>
+  <polygon points="610,278 616,255 622,278" fill="#ff6b35"/>
+
+  <!-- bear: built from ellipse() primitives, p5-primitive style -->
+  <g>
+    <!-- body -->
+    <ellipse cx="510" cy="270" rx="34" ry="26" fill="#5c3a21" stroke="#2e1d10" stroke-width="3"/>
+    <!-- head -->
+    <circle cx="486" cy="238" r="20" fill="#5c3a21" stroke="#2e1d10" stroke-width="3"/>
+    <!-- ears -->
+    <circle cx="473" cy="222" r="7" fill="#5c3a21" stroke="#2e1d10" stroke-width="3"/>
+    <circle cx="499" cy="222" r="7" fill="#5c3a21" stroke="#2e1d10" stroke-width="3"/>
+    <!-- snout -->
+    <ellipse cx="482" cy="244" rx="9" ry="7" fill="#8a5a34"/>
+    <!-- eyes -->
+    <circle cx="480" cy="234" r="2.2" fill="#1e1e1e"/>
+    <circle cx="493" cy="234" r="2.2" fill="#1e1e1e"/>
+    <!-- nose -->
+    <circle cx="480" cy="243" r="2" fill="#1e1e1e"/>
+    <!-- arm -->
+    <ellipse cx="530" cy="268" rx="8" ry="16" fill="#5c3a21" stroke="#2e1d10" stroke-width="2.5"/>
+  </g>
+
+  <!-- pine trees: triangle() primitives -->
+  <g fill="#274a2e" stroke="#16281a" stroke-width="2">
+    <polygon points="140,300 165,230 190,300"/>
+    <polygon points="170,300 195,235 220,300"/>
+    <polygon points="1000,300 1025,235 1050,300"/>
+    <polygon points="1030,300 1055,240 1080,300"/>
+  </g>
+
+  <!-- title, monospace like p5's default text feel -->
+  <text x="600" y="55" text-anchor="middle" font-family="'Courier New', Courier, monospace" font-size="42" font-weight="700" fill="#ffffff" letter-spacing="2">THE BEAR CAVE</text>
+  <text x="600" y="78" text-anchor="middle" font-family="'Courier New', Courier, monospace" font-size="14" fill="#8fd3a0" letter-spacing="2">TYLER MYRANS // CART253 // setup()</text>
+</svg>
