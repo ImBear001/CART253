@@ -23,6 +23,8 @@ function setup() {
  */
 function draw() {
     drawSky();
+    drawRock();
+    drawCaveMouth();
 }
 
 /**
@@ -52,5 +54,37 @@ function drawSky() {
     point(300, 95);
     point(460, 170);
     point(30, 170);
+    pop();
+}
+
+/**
+ * Draws the big rock the cave is carved into
+ */
+function drawRock() {
+    push();
+    noStroke();
+    fill(95, 88, 82);
+    // A lumpy mountain shape made point by point
+    beginShape();
+    vertex(40, 390);
+    vertex(90, 260);
+    vertex(170, 190);
+    vertex(260, 160);
+    vertex(350, 200);
+    vertex(430, 280);
+    vertex(470, 390);
+    endShape(CLOSE);
+    pop();
+}
+
+/**
+ * Draws the dark opening of the cave
+ */
+function drawCaveMouth() {
+    push();
+    noStroke();
+    fill(15, 12, 10);
+    // Top half of an ellipse (from PI to TWO_PI) makes an archway
+    arc(250, 390, 220, 240, PI, TWO_PI, CHORD);
     pop();
 }
