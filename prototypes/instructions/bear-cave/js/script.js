@@ -25,6 +25,7 @@ function draw() {
     drawSky();
     drawRock();
     drawCaveMouth();
+    drawGround();
 }
 
 /**
@@ -86,5 +87,16 @@ function drawCaveMouth() {
     fill(15, 12, 10);
     // Top half of an ellipse (from PI to TWO_PI) makes an archway
     arc(250, 390, 220, 240, PI, TWO_PI, CHORD);
+    pop();
+}
+
+/**
+ * Draws the grassy ground in front of the cave
+ */
+function drawGround() {
+    push();
+    noStroke();
+    fill(40, 70, 45);
+    rect(0, 390, 500, 110);
     pop();
 }
