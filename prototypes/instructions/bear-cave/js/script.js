@@ -107,6 +107,7 @@ function drawGround() {
  */
 function drawBear() {
     drawBearHead();
+    drawBearFace();
 }
 
 /**
@@ -129,5 +130,32 @@ function drawBearHead() {
     // Head
     fill(110, 70, 40);
     ellipse(250, 345, 120, 100);
+    pop();
+}
+
+/**
+ * Draws the bear's eyes, muzzle, and nose
+ */
+function drawBearFace() {
+    push();
+    noStroke();
+
+    // Whites of the eyes
+    fill(255);
+    ellipse(228, 332, 16);
+    ellipse(272, 332, 16);
+
+    // Pupils are nudged right so the bear is looking off to the side
+    fill(0);
+    ellipse(231, 332, 8);
+    ellipse(275, 332, 8);
+
+    // Lighter muzzle
+    fill(175, 130, 90);
+    ellipse(250, 365, 56, 40);
+
+    // Nose
+    fill(30, 20, 15);
+    ellipse(250, 356, 20, 14);
     pop();
 }
