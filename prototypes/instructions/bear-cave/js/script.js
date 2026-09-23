@@ -108,6 +108,7 @@ function drawGround() {
 function drawBear() {
     drawBearHead();
     drawBearFace();
+    drawBearPaws();
 }
 
 /**
@@ -157,5 +158,29 @@ function drawBearFace() {
     // Nose
     fill(30, 20, 15);
     ellipse(250, 356, 20, 14);
+    pop();
+}
+
+/**
+ * Draws the bear's paws hanging over the edge of the ground
+ */
+function drawBearPaws() {
+    push();
+    noStroke();
+    fill(110, 70, 40);
+    ellipse(215, 392, 44, 26);
+    ellipse(285, 392, 44, 26);
+    pop();
+
+    // Little claw marks on each paw
+    push();
+    stroke(230, 220, 200);
+    strokeWeight(2);
+    line(205, 398, 205, 404);
+    line(215, 399, 215, 405);
+    line(225, 398, 225, 404);
+    line(275, 398, 275, 404);
+    line(285, 399, 285, 405);
+    line(295, 398, 295, 404);
     pop();
 }
