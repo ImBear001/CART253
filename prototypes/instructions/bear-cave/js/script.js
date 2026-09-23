@@ -34,6 +34,7 @@ function draw() {
     drawCaveMouth();
     drawGround();
     drawBear();
+    drawCampfire();
 }
 
 /**
@@ -189,5 +190,34 @@ function drawBearPaws() {
     line(275, 398, 275, 404);
     line(285, 399, 285, 405);
     line(295, 398, 295, 404);
+    pop();
+}
+
+/**
+ * Draws a small campfire on the grass beside the cave
+ */
+function drawCampfire() {
+    // Warm glow on the grass (the 4th number in fill() is transparency)
+    push();
+    noStroke();
+    fill(255, 150, 80,100);
+    ellipse(100, 460, 160, 60);
+    pop();
+
+    // Two crossed logs
+    push();
+    noStroke();
+    fill(90, 55, 30);
+    quad(70, 455, 80, 445, 130, 460, 120, 470);
+    quad(70, 460, 120, 445, 130, 455, 80, 470);
+    pop();
+
+    // Flames: big orange triangle with a smaller yellow one inside
+    push();
+    noStroke();
+    fill(255, 120, 30);
+    triangle(80, 455, 120, 455, 100, 400);
+    fill(255, 220, 80);
+    triangle(90, 455, 110, 455, 100, 420);
     pop();
 }
