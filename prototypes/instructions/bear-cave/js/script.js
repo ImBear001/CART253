@@ -2,7 +2,14 @@
  * Bear Cave
  * Tyler Myrans
  *
- * A bear peeking out of its cave on a quiet night.
+ * A bear peeking out of its cave on a quiet night. The whole scene is
+ * built by layering simple shapes on top of each other: the rock is a
+ * custom shape made with beginShape() and vertex(), the cave mouth is
+ * an arc(), and the bear is a stack of ellipses with its paws resting
+ * over the edge of the ground.
+ *
+ * The idea of splitting the drawing into small named functions comes
+ * from Pippin Barr's "Cat" example.
  *
  * Uses:
  * p5.js
