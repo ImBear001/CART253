@@ -26,6 +26,7 @@ function draw() {
     drawRock();
     drawCaveMouth();
     drawGround();
+    drawBear();
 }
 
 /**
@@ -98,5 +99,35 @@ function drawGround() {
     noStroke();
     fill(40, 70, 45);
     rect(0, 390, 500, 110);
+    pop();
+}
+
+/**
+ * Draws the whole bear
+ */
+function drawBear() {
+    drawBearHead();
+}
+
+/**
+ * Draws the bear's head and ears
+ */
+function drawBearHead() {
+    push();
+    noStroke();
+
+    // Ears go first so the head covers their bottom halves
+    fill(110, 70, 40);
+    ellipse(210, 305, 36);
+    ellipse(290, 305, 36);
+
+    // Inside of the ears
+    fill(160, 110, 75);
+    ellipse(210, 305, 18);
+    ellipse(290, 305, 18);
+
+    // Head
+    fill(110, 70, 40);
+    ellipse(250, 345, 120, 100);
     pop();
 }
