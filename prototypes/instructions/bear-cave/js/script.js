@@ -1,24 +1,34 @@
 /**
- * Title of Project
- * Author Name
- * 
- * HOW EMBARRASSING! I HAVE NO DESCRIPTION OF MY PROJECT!
- * PLEASE REMOVE A GRADE FROM MY WORK IF IT'S GRADED!
+ * Bear Cave
+ * Tyler Myrans
+ *
+ * A bear peeking out of its cave on a quiet night.
+ *
+ * Uses:
+ * p5.js
+ * https://p5js.org/
  */
 
 "use strict";
 
 /**
- * OH LOOK I DIDN'T DESCRIBE SETUP!!
-*/
+ * Creates a square canvas for the scene
+ */
 function setup() {
-
+    createCanvas(500, 500);
 }
 
+/**
+ * Draws the night scene back to front
+ */
+function draw() {
+    drawSky();
+}
 
 /**
- * OOPS I DIDN'T DESCRIBE WHAT MY DRAW DOES!
-*/
-function draw() {
-
+ * Draws the night sky
+ */
+function drawSky() {
+    // Dark blue night
+    background(20, 25, 55);
 }
