@@ -2,7 +2,15 @@
  * Upside Down Catch
  * Tyler Myrans
  *
- * The bear from Bear Cave catches a salmon, but everything is flipped.
+ * The food chain is upside down. Instead of the bear from Bear Cave
+ * catching a salmon, a giant salmon is diving out of the sky to catch
+ * the bear. And the bear isn't even a normal bear anymore: it's a
+ * bear-fish, with a bear head and a fish tail, swimming in the river.
+ *
+ * The salmon is drawn head-down (the tail is at the top, coming out
+ * of a cloud), the bear-fish's tail is triangles with arcs for
+ * scales, and the river in front is see-through (using the 4th
+ * number in fill()) so you can see the bear-fish's body underwater.
  *
  * Uses:
  * p5.js
@@ -26,6 +34,8 @@ function draw() {
     drawWaterfall();
     drawBearFish();
     drawGiantSalmon();
+    drawCloud();
+    drawRiverFront();
 }
 
 /**
@@ -207,5 +217,40 @@ function drawGiantSalmon() {
     strokeWeight(4);
     line(292, 192, 316, 200);
     line(368, 192, 344, 200);
+    pop();
+}
+
+/**
+ * Draws a cloud the salmon is bursting out of
+ */
+function drawCloud() {
+    push();
+    noStroke();
+    fill(255);
+    ellipse(330, 15, 180, 70);
+    ellipse(270, 25, 90, 55);
+    ellipse(395, 25, 90, 55);
+    pop();
+}
+
+/**
+ * Draws see-through water in front of the bear-fish so its body
+ * looks like it's underwater
+ */
+function drawRiverFront() {
+    push();
+    noStroke();
+    fill(60, 120, 190, 90);
+    rect(0, 385, 500, 115);
+    pop();
+
+    // A few white ripples on the surface
+    push();
+    noFill();
+    stroke(220, 235, 250);
+    strokeWeight(2);
+    arc(145, 388, 120, 14, 0, PI);
+    arc(300, 388, 60, 10, 0, PI);
+    arc(430, 388, 60, 10, 0, PI);
     pop();
 }
