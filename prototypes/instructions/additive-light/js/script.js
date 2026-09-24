@@ -33,10 +33,13 @@ function draw() {
 
 /**
  * Draws three overlapping circles of pure red, green, and blue
+ * that add together where they overlap
  */
 function drawLights() {
     push();
     noStroke();
+    // ADD makes overlapping colours brighter instead of covering each other
+    blendMode(ADD);
 
     // Red light (hue 0)
     fill(0, 100, 100);
@@ -49,5 +52,9 @@ function drawLights() {
     // Blue light (hue 240)
     fill(240, 100, 100);
     ellipse(250, 290, 220);
+
+    // Go back to normal blending so the next frame's background
+    // covers everything instead of adding to it
+    blendMode(BLEND);
     pop();
 }
