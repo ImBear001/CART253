@@ -6,6 +6,7 @@
  * hues (red, green, blue) are drawn as overlapping circles using
  * blendMode(ADD), so wherever they overlap the colours add together
  * the way stage lights do: red + green makes yellow, and all three
+ * together make white. Colours are chosen with colorMode(HSB) so
  * each light is picked by its position on the colour wheel.
  * A ring of thick arcs in the same hues frames the whole thing.
  *
