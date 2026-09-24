@@ -11,3 +11,22 @@ I hope future visitors to this site get a sense of my process, not just finished
 Screenshot of the site so far:
 
 ![Screenshot of The Bear Cave homepage](./images/screenshot.png)
+
+
+## September 24, 2026
+
+### Prototyping: Instructions
+
+![Bear Cave](prototypes/instructions/bear-cave/thebearcavescreenshot.png)
+
+![Additive Light](prototypes/instructions/additive-light/additive-light.png)
+
+![Upside Down Catch](prototypes/instructions/upside-down-catch/upside-down-catchsc.png)
+
+This week I made three prototypes: Bear Cave (a bear peeking out of a cave at night), Additive Light (red, green and blue circles that mix like real light), and Upside Down Catch (a giant salmon diving out of the sky to eat my bear, who's now a bear-fish). I wanted them to feel connected, so the same bear shows up in two of them.
+
+What surprised me most is how much you can fake. There's no moon function, so I made a crescent by covering a circle with another circle the same colour as the sky. The coolest moment was blendMode(ADD), when three coloured circles turned white in the middle. I didn't expect that at all.
+
+Honestly, a lot of it was annoying. Finding coordinates is just guessing, saving, and guessing again. Pippin's comment in the cat example about the ears being "truly hellish" is so real. PI and TWO_PI for arcs didn't make sense until I just tried numbers, and I still don't fully get how bezier() control points pull the curve. I also forgot that draw order matters, so the bear's ears ended up on top of his head at first. On top of that, my template folder ended up nested one level too deep and OneDrive locked a folder so I couldn't rename it, which ate a lot of time for no reason.
+
+My first idea for the weird one was a messed-up face, but it was too close to the cat example, so I changed it. I hope people see a little story instead of three random drawings. Upside Down Catch looks like a frame from a game, and I'd like to make the salmon actually fall when you click and have you steer the bear-fish out of the way.
