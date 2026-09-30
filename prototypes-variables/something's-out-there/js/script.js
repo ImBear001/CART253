@@ -4,6 +4,7 @@
  *
  * You're the bear, looking out of the cave at night into the forest.
  * Something's eyes are drifting between the trees (Perlin noise).
+ * The mouse is your flashlight: the beam gets brighter when it's on the eyes.
  *
  * Uses:
  * p5.js
@@ -22,6 +23,16 @@ let thing = {
   noiseSpeed: 0.006,
   eyeSize: 8,
   spacing: 20
+};
+
+// The flashlight (follows the mouse)
+let flashlight = {
+  // Where the beam comes from (you, at the bottom of the screen)
+  x: 200,
+  y: 400,
+  radius: 55,
+  // True when the beam is on the eyes
+  onThing: false
 };
 
 // How many trees are out there
@@ -44,6 +55,7 @@ function draw() {
 
   drawTrees();
   drawThing();
+  drawFlashlight();
   drawCaveMouth();
 }
 
@@ -60,6 +72,10 @@ function updateThing() {
   thing.y = map(noise(thing.noiseY), 0.2, 0.8, 170, 280);
   thing.x = constrain(thing.x, 60, width - 60);
   thing.y = constrain(thing.y, 170, 280);
+
+  // Is the flashlight shining on it?
+  let distance = dist(mouseX, mouseY, thing.x, thing.y);
+  flashlight.onThing = distance < flashlight.radius;
 }
 
 /**
@@ -101,6 +117,38 @@ function drawThing() {
   fill(255, 200, 60);
   ellipse(thing.x - thing.spacing / 2, thing.y, thing.eyeSize, thing.eyeSize * 0.6);
   ellipse(thing.x + thing.spacing / 2, thing.y, thing.eyeSize, thing.eyeSize * 0.6);
+  pop();
+}
+
+/**
+ * Draw the flashlight beam from the bottom of the screen to the mouse
+ */
+function drawFlashlight() {
+  // Angle and length from the flashlight to the mouse
+  let angle = atan2(mouseY - flashlight.y, mouseX - flashlight.x);
+  let beamLength = dist(flashlight.x, flashlight.y, mouseX, mouseY);
+
+  // Beam brightens when it's on the thing
+  let beamAlpha = 25;
+  if (flashlight.onThing) {
+    beamAlpha = 55;
+  }
+
+  push();
+  noStroke();
+  fill(255, 240, 200, beamAlpha);
+  // Rotate so the beam points at the mouse
+  translate(flashlight.x, flashlight.y);
+  rotate(angle);
+  triangle(0, -8, 0, 8, beamLength, flashlight.radius);
+  triangle(0, -8, beamLength, -flashlight.radius, beamLength, flashlight.radius);
+  pop();
+
+  // The spot of light at the end of the beam
+  push();
+  noStroke();
+  fill(255, 240, 200, beamAlpha);
+  ellipse(mouseX, mouseY, flashlight.radius * 2);
   pop();
 }
 
