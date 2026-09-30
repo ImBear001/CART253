@@ -2,9 +2,10 @@
  * Something's Out There
  * Tyler Myrans
  *
- * You're the bear, looking out of the cave at night into the forest.
- * Something's eyes are drifting between the trees (Perlin noise).
- * The mouse is your flashlight: the beam gets brighter when it's on the eyes.
+ * You're the bear, looking out of the cave at night. Something's
+ * eyes are drifting between the trees (Perlin noise), slowly creeping
+ * closer. The mouse is your flashlight: shine it on the eyes and they
+ * back off.
  *
  * Uses:
  * p5.js
@@ -21,8 +22,15 @@ let thing = {
   noiseX: 0,
   noiseY: 1000,
   noiseSpeed: 0.006,
-  eyeSize: 8,
-  spacing: 20
+  // How close it is (0 = far away in the trees, 1 = right at the cave)
+  approach: 0,
+  approachRate: 0.0015,
+  retreatRate: 0.012,
+  // Eye size and spacing when far and when close
+  minEyeSize: 3,
+  maxEyeSize: 22,
+  minSpacing: 8,
+  maxSpacing: 60
 };
 
 // The flashlight (follows the mouse)
@@ -46,7 +54,7 @@ function setup() {
 }
 
 /**
- * Update the eyes, then draw the scene
+ * Update everything, then draw the scene
  */
 function draw() {
   background(25, 30, 55);
@@ -60,22 +68,31 @@ function draw() {
 }
 
 /**
- * Move the eyes around between the trees using Perlin noise
+ * Move the eyes with noise, and make them creep closer
+ * (or back off if the flashlight is on them)
  */
 function updateThing() {
   thing.noiseX += thing.noiseSpeed;
   thing.noiseY += thing.noiseSpeed;
 
-  // noise() gives a smooth value between 0 and 1, but mostly stays
-  // between 0.2 and 0.8, so map that range to the area between the trees
+  // The closer it is, the lower on the screen it can come
+  let lowest = lerp(240, 320, thing.approach);
   thing.x = map(noise(thing.noiseX), 0.2, 0.8, 60, width - 60);
-  thing.y = map(noise(thing.noiseY), 0.2, 0.8, 170, 280);
+  thing.y = map(noise(thing.noiseY), 0.2, 0.8, 170, lowest);
   thing.x = constrain(thing.x, 60, width - 60);
-  thing.y = constrain(thing.y, 170, 280);
+  thing.y = constrain(thing.y, 170, lowest);
 
   // Is the flashlight shining on it?
   let distance = dist(mouseX, mouseY, thing.x, thing.y);
   flashlight.onThing = distance < flashlight.radius;
+
+  if (flashlight.onThing) {
+    thing.approach -= thing.retreatRate;
+  }
+  else {
+    thing.approach += thing.approachRate;
+  }
+  thing.approach = constrain(thing.approach, 0, 1);
 }
 
 /**
@@ -104,19 +121,29 @@ function drawTrees() {
 }
 
 /**
- * Draw the thing as two glowing eyes
+ * Draw the thing as two glowing eyes that get bigger as it gets closer.
+ * They blink every so often.
  */
 function drawThing() {
+  let eyeSize = lerp(thing.minEyeSize, thing.maxEyeSize, thing.approach);
+  let spacing = lerp(thing.minSpacing, thing.maxSpacing, thing.approach);
+
+  // Blink: sin() only goes above 0.97 for a moment each cycle
+  let blinking = sin(frameCount * 0.03) > 0.97;
+  if (blinking) {
+    return;
+  }
+
   push();
   noStroke();
   // Glow
   fill(255, 60, 30, 60);
-  ellipse(thing.x - thing.spacing / 2, thing.y, thing.eyeSize * 2.5);
-  ellipse(thing.x + thing.spacing / 2, thing.y, thing.eyeSize * 2.5);
+  ellipse(thing.x - spacing / 2, thing.y, eyeSize * 2.5);
+  ellipse(thing.x + spacing / 2, thing.y, eyeSize * 2.5);
   // Eyes
   fill(255, 200, 60);
-  ellipse(thing.x - thing.spacing / 2, thing.y, thing.eyeSize, thing.eyeSize * 0.6);
-  ellipse(thing.x + thing.spacing / 2, thing.y, thing.eyeSize, thing.eyeSize * 0.6);
+  ellipse(thing.x - spacing / 2, thing.y, eyeSize, eyeSize * 0.6);
+  ellipse(thing.x + spacing / 2, thing.y, eyeSize, eyeSize * 0.6);
   pop();
 }
 
