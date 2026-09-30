@@ -5,7 +5,7 @@
  * A bear sitting in the dark, breathing. Move the mouse to the right
  * and he starts to panic: he breathes faster, deeper, and flushes red.
  * Move it back left and he calms down again. The more he panics,
- * the more his mouth tenses up (a thicker, wider line).
+ * the more his mouth drops open in shock (a thicker, wider line).
  *
  * Uses:
  * p5.js
@@ -42,7 +42,7 @@ let panic = 0;
 let breathAngle = 0;
 
 // Breathing speed and depth at each end of the panic scale
-let minBreathSpeed = 0.02;
+let minBreathSpeed = 0.015;
 let maxBreathSpeed = 0.3;
 let minBreathAmount = 8;
 let maxBreathAmount = 30;
@@ -58,7 +58,7 @@ function setup() {
  * Update the bear's panic and breathing, then draw him
  */
 function draw() {
-  background(30, 40, 60);
+  background(20, 25, 45);
 
   updatePanic();
   updateBreathing();
@@ -108,7 +108,7 @@ function drawBear() {
   pop();
 
   // Eyes get wider as he panics
-  let eyeSize = lerp(10, 28, panic);
+  let eyeSize = lerp(10, 34, panic);
   let eyeOffsetX = bear.size * 0.18;
   let eyeY = bear.y - bear.size * 0.08;
 
@@ -126,13 +126,14 @@ function drawBear() {
 }
 
 /**
- * Draw a nose, and a mouth that gets thicker and wider as he panics
+ * Draw a nose, and a round "shocked" mouth that opens wider as he panics,
+ * with a row of teeth showing at the top
  */
 function drawNoseAndMouth() {
   let noseY = bear.y + bear.size * 0.1;
-  let mouthY = bear.y + bear.size * 0.25;
-  let mouthWidth = lerp(bear.size * 0.1, bear.size * 0.3, panic);
-  let mouthWeight = lerp(2, 9, panic);
+  let mouthY = bear.y + bear.size * 0.26;
+  let mouthSize = lerp(bear.size * 0.06, bear.size * 0.24, panic);
+  let teethSize = mouthSize * 0.22;
 
   // Nose
   push();
@@ -141,10 +142,20 @@ function drawNoseAndMouth() {
   ellipse(bear.x, noseY, bear.size * 0.12, bear.size * 0.08);
   pop();
 
-  // Mouth
+  // Mouth (a dark open circle)
   push();
-  stroke(40, 25, 20);
-  strokeWeight(mouthWeight);
-  line(bear.x - mouthWidth / 2, mouthY, bear.x + mouthWidth / 2, mouthY);
+  noStroke();
+  fill(50, 10, 15);
+  ellipse(bear.x, mouthY, mouthSize * 0.9, mouthSize);
+  pop();
+
+  // Teeth: two small white squares along the top of the mouth
+  push();
+  noStroke();
+  fill(255);
+  rectMode(CENTER);
+  let teethY = mouthY - mouthSize * 0.3;
+  rect(bear.x - teethSize * 0.55, teethY, teethSize, teethSize);
+  rect(bear.x + teethSize * 0.55, teethY, teethSize, teethSize);
   pop();
 }
