@@ -88,3 +88,30 @@ function drawStars() {
   }
   pop();
 }
+
+// The moon follows the mouse
+let moon = {
+  size: 60,
+  glowSize: 140
+};
+function draw() {
+  updateSky();
+  updateStars();
+
+  background(sky.r, sky.g, sky.b);
+
+  drawStars();
+  drawMoon();
+}
+/**
+ * Draw the moon (with a soft glow) where the mouse is
+ */
+function drawMoon() {
+  push();
+  noStroke();
+  fill(255, 250, 220, 40);
+  ellipse(mouseX, mouseY, moon.glowSize);
+  fill(255, 250, 220);
+  ellipse(mouseX, mouseY, moon.size);
+  pop();
+}
