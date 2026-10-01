@@ -5,7 +5,8 @@
  * You're the bear, looking out of the cave at night. Something's
  * eyes are drifting between the trees (Perlin noise), slowly creeping
  * closer. The mouse is your flashlight: shine it on the eyes and they
- * back off.
+ * back off. The closer they get, the faster and harder your heart pounds
+ * (a red pulse around the edges of the screen).
  *
  * Uses:
  * p5.js
@@ -43,6 +44,14 @@ let flashlight = {
   onThing: false
 };
 
+// The heartbeat
+let heart = {
+  angle: 0,
+  minSpeed: 0.05,
+  maxSpeed: 0.35,
+  maxWeight: 40
+};
+
 // How many trees are out there
 let numTrees = 9;
 
@@ -60,11 +69,13 @@ function draw() {
   background(25, 30, 55);
 
   updateThing();
+  updateHeart();
 
   drawTrees();
   drawThing();
   drawFlashlight();
   drawCaveMouth();
+  drawHeartbeat();
 }
 
 /**
@@ -93,6 +104,14 @@ function updateThing() {
     thing.approach += thing.approachRate;
   }
   thing.approach = constrain(thing.approach, 0, 1);
+}
+
+/**
+ * The heart beats faster the closer the thing is
+ */
+function updateHeart() {
+  let speed = lerp(heart.minSpeed, heart.maxSpeed, thing.approach);
+  heart.angle += speed;
 }
 
 /**
@@ -188,5 +207,22 @@ function drawCaveMouth() {
   stroke(0);
   strokeWeight(160);
   ellipse(width / 2, height / 2 + 40, width + 120, height + 60);
+  pop();
+}
+
+/**
+ * Draw a red pulse around the edges that gets faster and thicker
+ * the closer the thing is
+ */
+function drawHeartbeat() {
+  // sin() goes -1 to 1, so map it to 0 to 1 for a pulse
+  let pulse = map(sin(heart.angle), -1, 1, 0, 1);
+  let weight = pulse * heart.maxWeight * thing.approach;
+
+  push();
+  noFill();
+  stroke(180, 0, 0, 120);
+  strokeWeight(weight);
+  rect(0, 0, width, height);
   pop();
 }
