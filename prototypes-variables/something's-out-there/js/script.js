@@ -25,7 +25,7 @@ let thing = {
   noiseSpeed: 0.006,
   // How close it is (0 = far away in the trees, 1 = right at the cave)
   approach: 0,
-  approachRate: 0.0015,
+  approachRate: 0.0025,
   retreatRate: 0.012,
   // Eye size and spacing when far and when close
   minEyeSize: 3,
@@ -53,7 +53,7 @@ let heart = {
 };
 
 // How many trees are out there
-let numTrees = 9;
+let numTrees = 14;
 
 /**
  * Create the canvas
@@ -160,7 +160,7 @@ function drawThing() {
   ellipse(thing.x - spacing / 2, thing.y, eyeSize * 2.5);
   ellipse(thing.x + spacing / 2, thing.y, eyeSize * 2.5);
   // Eyes
-  fill(255, 200, 60);
+  fill(180, 255, 80);
   ellipse(thing.x - spacing / 2, thing.y, eyeSize, eyeSize * 0.6);
   ellipse(thing.x + spacing / 2, thing.y, eyeSize, eyeSize * 0.6);
   pop();
