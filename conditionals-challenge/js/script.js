@@ -6,6 +6,13 @@ const puck = {
 };
 
 const user = {
+  x: undefined,
+  y: undefined,
+  size: 75,
+  fill: "#000000"
+};
+
+const target = {
   x: 320,
   y: 80,
   size: 120,
@@ -21,7 +28,9 @@ function draw() {
 
   moveUser();
   movePuck();
+  checkTarget();
 
+  drawTarget();
   drawUser();
   drawPuck();
 }
@@ -40,6 +49,25 @@ function movePuck() {
   }
 }
 
+function checkTarget() {
+  const d = dist(puck.x, puck.y, target.x, target.y);
+
+  if (d < puck.size / 2 + target.size / 2) {
+    target.fill = "#00ff00";
+  }
+  else {
+    target.fill = "#ff0000";
+  }
+}
+
+function drawTarget() {
+  push();
+  noStroke();
+  fill(target.fill);
+  ellipse(target.x, target.y, target.size);
+  pop();
+}
+
 function drawUser() {
   push();
   noStroke();
@@ -53,12 +81,5 @@ function drawPuck() {
   noStroke();
   fill(puck.fill);
   ellipse(puck.x, puck.y, puck.size);
-  pop();
-}
-function drawTarget() {
-  push();
-  noStroke();
-  fill(target.fill);
-  ellipse(target.x, target.y, target.size);
   pop();
 }
