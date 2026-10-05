@@ -2,8 +2,10 @@
  * Picky Bear
  * Tyler Myrans
  *
- * A hungry bear sitting at a table full of food.
- * Click a food on the table to pick it up and carry it around.
+ * A hungry bear with opinions. Click a food on the table to pick it up
+ * (honey, fish, berries, or garbage), then bring it close to his mouth.
+ * He reacts to whatever you're holding: he loves honey, likes fish, isn't
+ * sure about berries, and is disgusted by garbage.
  *
  * Uses:
  * p5.js
@@ -21,11 +23,14 @@ let bear = {
     r: 120,
     g: 80,
     b: 50
-  }
+  },
+  // How close the food has to be for him to react
+  reactDistance: 90
 };
 
 // The food you're holding ("none" if you're not holding anything)
 let food = "none";
+let reaction = "waiting";
 
 // The foods sitting on the table at the bottom
 let tableY = 355;
@@ -43,13 +48,16 @@ let pickUpDistance = 30;
  */
 function setup() {
   createCanvas(400, 400);
+  textAlign(CENTER, CENTER);
 }
 
 /**
- * Draw the table, the bear, and the food you're holding
+ * Work out the food and the bear's reaction, then draw everything
  */
 function draw() {
   background(40, 55, 45);
+
+  chooseReaction();
 
   drawTable();
   drawBear();
@@ -57,6 +65,30 @@ function draw() {
     drawFood(food, mouseX, mouseY);
   }
   drawLabels();
+}
+
+/**
+ * Decide how the bear feels, based on how close the food is and what it is
+ */
+function chooseReaction() {
+  let mouthY = bear.y + bear.size * 0.25;
+  let distance = dist(mouseX, mouseY, bear.x, mouthY);
+
+  if (food === "none" || distance > bear.reactDistance) {
+    reaction = "waiting";
+  }
+  else if (food === "honey") {
+    reaction = "love";
+  }
+  else if (food === "fish") {
+    reaction = "like";
+  }
+  else if (food === "berries") {
+    reaction = "unsure";
+  }
+  else {
+    reaction = "gross";
+  }
 }
 
 /**
@@ -75,6 +107,138 @@ function mousePressed() {
   else if (dist(mouseX, mouseY, foodSpots.garbage, tableY) < pickUpDistance) {
     food = "garbage";
   }
+}
+
+/**
+ * Draw the bear, with a face that matches his reaction
+ */
+function drawBear() {
+  let size = bear.size;
+  let earOffset = size * 0.35;
+  let earSize = size * 0.32;
+
+  // Garbage turns him a little green
+  let r = bear.fill.r;
+  let g = bear.fill.g;
+  let b = bear.fill.b;
+  if (reaction === "gross") {
+    r = 100;
+    g = 120;
+    b = 60;
+  }
+
+  push();
+  noStroke();
+  fill(r, g, b);
+  ellipse(bear.x - earOffset, bear.y - earOffset, earSize);
+  ellipse(bear.x + earOffset, bear.y - earOffset, earSize);
+  ellipse(bear.x, bear.y, size);
+  // Muzzle
+  fill(190, 150, 110);
+  ellipse(bear.x, bear.y + size * 0.18, size * 0.45, size * 0.32);
+  // Nose
+  fill(40, 25, 20);
+  ellipse(bear.x, bear.y + size * 0.09, size * 0.12, size * 0.08);
+  pop();
+
+  drawEyes(size);
+  drawMouth(size);
+
+  // Blush when he loves it
+  if (reaction === "love") {
+    push();
+    noStroke();
+    fill(255, 120, 140, 150);
+    ellipse(bear.x - size * 0.28, bear.y + size * 0.08, size * 0.14, size * 0.08);
+    ellipse(bear.x + size * 0.28, bear.y + size * 0.08, size * 0.14, size * 0.08);
+    pop();
+  }
+}
+
+/**
+ * Draw the eyes: they follow the food, and change shape with the reaction
+ */
+function drawEyes(size) {
+  let eyeY = bear.y - size * 0.1;
+  let eyeOffsetX = size * 0.18;
+  let eyeSize = size * 0.11;
+
+  push();
+  stroke(20);
+  strokeWeight(4);
+
+  if (reaction === "love") {
+    // Happy closed eyes (upside-down U shapes)
+    noFill();
+    arc(bear.x - eyeOffsetX, eyeY, eyeSize, eyeSize, PI, TWO_PI);
+    arc(bear.x + eyeOffsetX, eyeY, eyeSize, eyeSize, PI, TWO_PI);
+  }
+  else if (reaction === "gross") {
+    // Squeezed shut
+    line(bear.x - eyeOffsetX - eyeSize / 2, eyeY, bear.x - eyeOffsetX + eyeSize / 2, eyeY);
+    line(bear.x + eyeOffsetX - eyeSize / 2, eyeY, bear.x + eyeOffsetX + eyeSize / 2, eyeY);
+  }
+  else {
+    // Open eyes, with pupils looking at the food
+    let lookX = constrain((mouseX - bear.x) * 0.03, -eyeSize * 0.25, eyeSize * 0.25);
+    let lookY = constrain((mouseY - eyeY) * 0.03, -eyeSize * 0.25, eyeSize * 0.25);
+
+    noStroke();
+    fill(255);
+    ellipse(bear.x - eyeOffsetX, eyeY, eyeSize);
+    ellipse(bear.x + eyeOffsetX, eyeY, eyeSize);
+    fill(0);
+    ellipse(bear.x - eyeOffsetX + lookX, eyeY + lookY, eyeSize * 0.45);
+    ellipse(bear.x + eyeOffsetX + lookX, eyeY + lookY, eyeSize * 0.45);
+
+    // Unsure: one raised eyebrow
+    if (reaction === "unsure") {
+      stroke(20);
+      strokeWeight(4);
+      line(bear.x + eyeOffsetX - eyeSize * 0.6, eyeY - eyeSize * 0.9, bear.x + eyeOffsetX + eyeSize * 0.6, eyeY - eyeSize * 1.3);
+    }
+  }
+  pop();
+}
+
+/**
+ * Draw the mouth, which changes with the reaction
+ */
+function drawMouth(size) {
+  let mouthY = bear.y + size * 0.25;
+  let mouthWidth = size * 0.2;
+
+  push();
+  stroke(40, 25, 20);
+  strokeWeight(4);
+  noFill();
+
+  if (reaction === "love") {
+    // Big open smile
+    fill(80, 20, 30);
+    arc(bear.x, mouthY - 4, mouthWidth * 1.4, mouthWidth * 1.2, 0, PI, CHORD);
+  }
+  else if (reaction === "like") {
+    // Open, ready to eat
+    fill(80, 20, 30);
+    ellipse(bear.x, mouthY, mouthWidth * 0.7, mouthWidth * 0.6);
+  }
+  else if (reaction === "unsure") {
+    // Wobbly flat line
+    line(bear.x - mouthWidth / 2, mouthY, bear.x + mouthWidth / 2, mouthY + 4);
+  }
+  else if (reaction === "gross") {
+    // Frown with tongue out
+    arc(bear.x, mouthY + 8, mouthWidth, mouthWidth * 0.6, PI, TWO_PI);
+    noStroke();
+    fill(230, 100, 120);
+    ellipse(bear.x + 4, mouthY + 10, mouthWidth * 0.35, mouthWidth * 0.45);
+  }
+  else {
+    // Waiting: a little smile
+    arc(bear.x, mouthY - 4, mouthWidth, mouthWidth * 0.5, 0, PI);
+  }
+  pop();
 }
 
 /**
@@ -99,48 +263,6 @@ function drawTable() {
   if (food !== "garbage") {
     drawFood("garbage", foodSpots.garbage, tableY);
   }
-}
-
-/**
- * Draw the bear's head with a simple waiting face
- */
-function drawBear() {
-  let size = bear.size;
-  let earOffset = size * 0.35;
-  let earSize = size * 0.32;
-  let eyeY = bear.y - size * 0.1;
-  let eyeOffsetX = size * 0.18;
-  let eyeSize = size * 0.11;
-  let mouthY = bear.y + size * 0.25;
-
-  push();
-  noStroke();
-  fill(bear.fill.r, bear.fill.g, bear.fill.b);
-  ellipse(bear.x - earOffset, bear.y - earOffset, earSize);
-  ellipse(bear.x + earOffset, bear.y - earOffset, earSize);
-  ellipse(bear.x, bear.y, size);
-  // Muzzle
-  fill(190, 150, 110);
-  ellipse(bear.x, bear.y + size * 0.18, size * 0.45, size * 0.32);
-  // Nose
-  fill(40, 25, 20);
-  ellipse(bear.x, bear.y + size * 0.09, size * 0.12, size * 0.08);
-  // Eyes
-  fill(255);
-  ellipse(bear.x - eyeOffsetX, eyeY, eyeSize);
-  ellipse(bear.x + eyeOffsetX, eyeY, eyeSize);
-  fill(0);
-  ellipse(bear.x - eyeOffsetX, eyeY, eyeSize * 0.45);
-  ellipse(bear.x + eyeOffsetX, eyeY, eyeSize * 0.45);
-  pop();
-
-  // Little smile
-  push();
-  stroke(40, 25, 20);
-  strokeWeight(4);
-  noFill();
-  arc(bear.x, mouthY - 4, size * 0.2, size * 0.1, 0, PI);
-  pop();
 }
 
 /**
@@ -192,7 +314,6 @@ function drawLabels() {
   push();
   fill(255);
   noStroke();
-  textAlign(CENTER, CENTER);
   textSize(16);
   if (food === "none") {
     text("Click a food to pick it up", width / 2, 24);
