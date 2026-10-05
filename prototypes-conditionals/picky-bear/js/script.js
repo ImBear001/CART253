@@ -5,7 +5,9 @@
  * A hungry bear with opinions. Click a food on the table to pick it up
  * (honey, fish, berries, or garbage), then bring it close to his mouth.
  * He reacts to whatever you're holding: he loves honey, likes fish, isn't
- * sure about berries, and is disgusted by garbage.
+ * sure about berries, and is disgusted by garbage. Click near his mouth to
+ * feed him. Feed him too much and he gets full and refuses everything
+ * until he's digested.
  *
  * Uses:
  * p5.js
@@ -24,6 +26,11 @@ let bear = {
     g: 80,
     b: 50
   },
+  // How full he is, and how full he can get
+  fullness: 0,
+  maxFullness: 6,
+  // How fast he digests (fullness goes down by this every frame)
+  digestRate: 0.004,
   // How close the food has to be for him to react
   reactDistance: 90
 };
@@ -43,6 +50,11 @@ let foodSpots = {
 // How close you have to click to pick a food up
 let pickUpDistance = 30;
 
+// A message that pops up after feeding, and how long it stays
+let message = "";
+let messageTimer = 0;
+let messageDuration = 70;
+
 /**
  * Create the canvas
  */
@@ -52,12 +64,13 @@ function setup() {
 }
 
 /**
- * Work out the food and the bear's reaction, then draw everything
+ * Work out the bear's reaction, digest, then draw everything
  */
 function draw() {
   background(40, 55, 45);
 
   chooseReaction();
+  digest();
 
   drawTable();
   drawBear();
@@ -68,7 +81,8 @@ function draw() {
 }
 
 /**
- * Decide how the bear feels, based on how close the food is and what it is
+ * Decide how the bear feels, based on how close the food is,
+ * what it is, and how full he already is
  */
 function chooseReaction() {
   let mouthY = bear.y + bear.size * 0.25;
@@ -76,6 +90,9 @@ function chooseReaction() {
 
   if (food === "none" || distance > bear.reactDistance) {
     reaction = "waiting";
+  }
+  else if (bear.fullness >= bear.maxFullness) {
+    reaction = "full";
   }
   else if (food === "honey") {
     reaction = "love";
@@ -92,28 +109,88 @@ function chooseReaction() {
 }
 
 /**
- * Click a food on the table to pick it up
+ * Slowly digest, so he gets hungry again
+ */
+function digest() {
+  bear.fullness = constrain(bear.fullness - bear.digestRate, 0, bear.maxFullness);
+  if (messageTimer > 0) {
+    messageTimer -= 1;
+  }
+}
+
+/**
+ * Click a food on the table to pick it up,
+ * or click near the bear's mouth to feed him
  */
 function mousePressed() {
+  // Picking up a food from the table
   if (dist(mouseX, mouseY, foodSpots.honey, tableY) < pickUpDistance) {
     food = "honey";
+    return;
   }
   else if (dist(mouseX, mouseY, foodSpots.fish, tableY) < pickUpDistance) {
     food = "fish";
+    return;
   }
   else if (dist(mouseX, mouseY, foodSpots.berries, tableY) < pickUpDistance) {
     food = "berries";
+    return;
   }
   else if (dist(mouseX, mouseY, foodSpots.garbage, tableY) < pickUpDistance) {
     food = "garbage";
+    return;
   }
+
+  // Not close enough to the bear to feed him
+  if (reaction === "waiting") {
+    return;
+  }
+
+  if (reaction === "full") {
+    showMessage("I'm stuffed...");
+  }
+  else if (reaction === "gross") {
+    showMessage("BLEH!");
+  }
+  else if (reaction === "love") {
+    bear.fullness += 2;
+    food = "none";
+    showMessage("HONEY!!!");
+  }
+  else if (reaction === "like") {
+    bear.fullness += 1;
+    food = "none";
+    showMessage("Mmm, fish.");
+  }
+  else {
+    // Berries: only eats them if he's hungry
+    if (bear.fullness < bear.maxFullness / 2) {
+      bear.fullness += 1;
+      food = "none";
+      showMessage("...fine.");
+    }
+    else {
+      showMessage("Nah.");
+    }
+  }
+
+  bear.fullness = constrain(bear.fullness, 0, bear.maxFullness);
+}
+
+/**
+ * Show a message above the bear for a little while
+ */
+function showMessage(text) {
+  message = text;
+  messageTimer = messageDuration;
 }
 
 /**
  * Draw the bear, with a face that matches his reaction
  */
 function drawBear() {
-  let size = bear.size;
+  // He gets a bit rounder the fuller he is
+  let size = bear.size + bear.fullness * 6;
   let earOffset = size * 0.35;
   let earSize = size * 0.32;
 
@@ -173,7 +250,7 @@ function drawEyes(size) {
     arc(bear.x - eyeOffsetX, eyeY, eyeSize, eyeSize, PI, TWO_PI);
     arc(bear.x + eyeOffsetX, eyeY, eyeSize, eyeSize, PI, TWO_PI);
   }
-  else if (reaction === "gross") {
+  else if (reaction === "gross" || reaction === "full") {
     // Squeezed shut
     line(bear.x - eyeOffsetX - eyeSize / 2, eyeY, bear.x - eyeOffsetX + eyeSize / 2, eyeY);
     line(bear.x + eyeOffsetX - eyeSize / 2, eyeY, bear.x + eyeOffsetX + eyeSize / 2, eyeY);
@@ -233,6 +310,10 @@ function drawMouth(size) {
     noStroke();
     fill(230, 100, 120);
     ellipse(bear.x + 4, mouthY + 10, mouthWidth * 0.35, mouthWidth * 0.45);
+  }
+  else if (reaction === "full") {
+    // Puffed cheeks, tiny mouth
+    ellipse(bear.x, mouthY, 8);
   }
   else {
     // Waiting: a little smile
@@ -308,7 +389,7 @@ function drawFood(type, x, y) {
 }
 
 /**
- * Show what you're holding at the top of the screen
+ * Draw the food name, the fullness bar, and any message
  */
 function drawLabels() {
   push();
@@ -320,6 +401,24 @@ function drawLabels() {
   }
   else {
     text("Holding: " + food, width / 2, 24);
+  }
+
+  // Fullness bar
+  let barWidth = 160;
+  let filled = map(bear.fullness, 0, bear.maxFullness, 0, barWidth);
+  fill(255, 255, 255, 60);
+  rect(width / 2 - barWidth / 2, 300, barWidth, 12, 6);
+  fill(240, 190, 60);
+  rect(width / 2 - barWidth / 2, 300, filled, 12, 6);
+  fill(255);
+  textSize(12);
+  text("fullness", width / 2, 324);
+
+  // Message after feeding
+  if (messageTimer > 0) {
+    textSize(26);
+    textStyle(BOLD);
+    text(message, width / 2, 56);
   }
   pop();
 }
