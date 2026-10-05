@@ -32,9 +32,9 @@ Honestly, a lot of it was annoying. Finding coordinates is just guessing, saving
 My first idea for the weird one was a messed-up face, but it was too close to the cat example, so I changed it. I hope people see a little story instead of three random drawings. Upside Down Catch looks like a frame from a game, and I'd like to make the salmon actually fall when you click and have you steer the bear-fish out of the way.
 
 ## Prototyping Variables
-![Breathing Bear](prototypes/variables/breathing-bear/screenshot.png)
-![Night in the Cave](prototypes/variables/night-in-the-cave/screenshot.png)
-![Something's Out There](prototypes/variables/somethings-out-there/screenshot.png)
+![Breathing Bear](prototypes-variables/breathing-bear/screenshot.png)
+![Night in the Cave](prototypes-variables/night-in-the-cave/screenshot.png)
+![Something's Out There](prototypes-variables/somethings-out-there/screenshot.png)
 
 Making these three prototypes was interesting because I didn’t know how different they would feel until I actually started building them. What surprised me most was how much a small change could shift the whole mood of a scene. In Breathing Bear, turning the bear’s mouth into a shocked face with teeth made him feel completely different. He became more expressive and almost a little creepy, even though it was a pretty simple change.
 
