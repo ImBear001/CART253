@@ -6,8 +6,8 @@
  * (honey, fish, berries, or garbage), then bring it close to his mouth.
  * He reacts to whatever you're holding: he loves honey, likes fish, isn't
  * sure about berries, and is disgusted by garbage. Click near his mouth to
- * feed him. Feed him too much and he gets full and refuses everything
- * until he's digested.
+ * feed him. Fill him all the way up and he gets stuffed: he refuses
+ * everything until he's digested at least half of it.
  *
  * Uses:
  * p5.js
@@ -29,6 +29,8 @@ let bear = {
   // How full he is, and how full he can get
   fullness: 0,
   maxFullness: 6,
+  // True once he's completely full, until he digests down to half
+  isStuffed: false,
   // How fast he digests (fullness goes down by this every frame)
   digestRate: 0.004,
   // How close the food has to be for him to react
@@ -47,7 +49,6 @@ let foodSpots = {
   berries: 250,
   garbage: 340
 };
-// How close you have to click to pick a food up
 let pickUpDistance = 30;
 
 // A message that pops up after feeding, and how long it stays
@@ -64,7 +65,7 @@ function setup() {
 }
 
 /**
- * Work out the bear's reaction, digest, then draw everything
+ * Work out the food and the bear's reaction, then draw everything
  */
 function draw() {
   background(40, 55, 45);
@@ -91,7 +92,7 @@ function chooseReaction() {
   if (food === "none" || distance > bear.reactDistance) {
     reaction = "waiting";
   }
-  else if (bear.fullness >= bear.maxFullness) {
+  else if (bear.isStuffed) {
     reaction = "full";
   }
   else if (food === "honey") {
@@ -109,10 +110,16 @@ function chooseReaction() {
 }
 
 /**
- * Slowly digest, so he gets hungry again
+ * Slowly digest, so he gets hungry again.
+ * Once he's stuffed, he stays stuffed until he's down to half full.
  */
 function digest() {
   bear.fullness = constrain(bear.fullness - bear.digestRate, 0, bear.maxFullness);
+
+  if (bear.fullness < bear.maxFullness / 2) {
+    bear.isStuffed = false;
+  }
+
   if (messageTimer > 0) {
     messageTimer -= 1;
   }
@@ -175,6 +182,12 @@ function mousePressed() {
   }
 
   bear.fullness = constrain(bear.fullness, 0, bear.maxFullness);
+
+  // Did that just fill him up? (Almost full counts, since he digests between bites)
+  if (bear.fullness > bear.maxFullness - 1) {
+    bear.fullness = bear.maxFullness;
+    bear.isStuffed = true;
+  }
 }
 
 /**
@@ -408,11 +421,22 @@ function drawLabels() {
   let filled = map(bear.fullness, 0, bear.maxFullness, 0, barWidth);
   fill(255, 255, 255, 60);
   rect(width / 2 - barWidth / 2, 300, barWidth, 12, 6);
-  fill(240, 190, 60);
+  // The bar turns red while he's stuffed
+  if (bear.isStuffed) {
+    fill(220, 70, 60);
+  }
+  else {
+    fill(240, 190, 60);
+  }
   rect(width / 2 - barWidth / 2, 300, filled, 12, 6);
   fill(255);
   textSize(12);
-  text("fullness", width / 2, 324);
+  if (bear.isStuffed) {
+    text("STUFFED (wait for him to digest)", width / 2, 324);
+  }
+  else {
+    text("fullness", width / 2, 324);
+  }
 
   // Message after feeding
   if (messageTimer > 0) {
