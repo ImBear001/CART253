@@ -3,6 +3,7 @@
  * Tyler Myrans
  *
  * A hungry bear sitting at a table full of food.
+ * Click a food on the table to pick it up and carry it around.
  *
  * Uses:
  * p5.js
@@ -23,6 +24,9 @@ let bear = {
   }
 };
 
+// The food you're holding ("none" if you're not holding anything)
+let food = "none";
+
 // The foods sitting on the table at the bottom
 let tableY = 355;
 let foodSpots = {
@@ -31,6 +35,8 @@ let foodSpots = {
   berries: 250,
   garbage: 340
 };
+// How close you have to click to pick a food up
+let pickUpDistance = 30;
 
 /**
  * Create the canvas
@@ -40,17 +46,39 @@ function setup() {
 }
 
 /**
- * Draw the table and the bear
+ * Draw the table, the bear, and the food you're holding
  */
 function draw() {
   background(40, 55, 45);
 
   drawTable();
   drawBear();
+  if (food !== "none") {
+    drawFood(food, mouseX, mouseY);
+  }
+  drawLabels();
 }
 
 /**
- * Draw the table with the foods on it
+ * Click a food on the table to pick it up
+ */
+function mousePressed() {
+  if (dist(mouseX, mouseY, foodSpots.honey, tableY) < pickUpDistance) {
+    food = "honey";
+  }
+  else if (dist(mouseX, mouseY, foodSpots.fish, tableY) < pickUpDistance) {
+    food = "fish";
+  }
+  else if (dist(mouseX, mouseY, foodSpots.berries, tableY) < pickUpDistance) {
+    food = "berries";
+  }
+  else if (dist(mouseX, mouseY, foodSpots.garbage, tableY) < pickUpDistance) {
+    food = "garbage";
+  }
+}
+
+/**
+ * Draw the table with the foods on it (the one you're holding is gone)
  */
 function drawTable() {
   push();
@@ -59,10 +87,18 @@ function drawTable() {
   rect(0, tableY - 10, width, height - tableY + 10);
   pop();
 
-  drawFood("honey", foodSpots.honey, tableY);
-  drawFood("fish", foodSpots.fish, tableY);
-  drawFood("berries", foodSpots.berries, tableY);
-  drawFood("garbage", foodSpots.garbage, tableY);
+  if (food !== "honey") {
+    drawFood("honey", foodSpots.honey, tableY);
+  }
+  if (food !== "fish") {
+    drawFood("fish", foodSpots.fish, tableY);
+  }
+  if (food !== "berries") {
+    drawFood("berries", foodSpots.berries, tableY);
+  }
+  if (food !== "garbage") {
+    drawFood("garbage", foodSpots.garbage, tableY);
+  }
 }
 
 /**
@@ -145,6 +181,24 @@ function drawFood(type, x, y) {
     let wiggle = sin(frameCount * 0.2) * 3;
     line(x - 8 + wiggle, y - 22, x - 8 - wiggle, y - 34);
     line(x + 8 - wiggle, y - 22, x + 8 + wiggle, y - 34);
+  }
+  pop();
+}
+
+/**
+ * Show what you're holding at the top of the screen
+ */
+function drawLabels() {
+  push();
+  fill(255);
+  noStroke();
+  textAlign(CENTER, CENTER);
+  textSize(16);
+  if (food === "none") {
+    text("Click a food to pick it up", width / 2, 24);
+  }
+  else {
+    text("Holding: " + food, width / 2, 24);
   }
   pop();
 }
