@@ -4,7 +4,9 @@
  *
  * The bear is fishing at the river. Click to swipe a paw into the water.
  * Most of the time you get a regular fish, sometimes a boot or nothing
- * at all, and very rarely (about 1 in 30) a golden salmon.
+ * at all, and very rarely (about 1 in 30) a glowing golden salmon.
+ * The bear's face changes depending on what he caught, and he gets
+ * grumpier the longer he goes without a fish.
  *
  * Uses:
  * p5.js
@@ -22,7 +24,9 @@ let bear = {
     r: 120,
     g: 80,
     b: 50
-  }
+  },
+  // How many swipes in a row with no fish
+  dryStreak: 0
 };
 
 // The chance of each catch (they're checked in this order)
@@ -33,7 +37,7 @@ let nothingChance = 0.35;
 // What came out of the water last, and how long it stays on screen
 let catchResult = "none";
 let catchTimer = 0;
-let catchDuration = 80;
+let catchDuration = 60;
 
 // The paw swipe animation
 let swipeTimer = 0;
@@ -88,25 +92,40 @@ function mousePressed() {
   if (roll < goldenChance) {
     catchResult = "golden";
     goldenCount += 1;
+    bear.dryStreak = 0;
   }
   else if (roll < goldenChance + bootChance) {
     catchResult = "boot";
     bootCount += 1;
+    bear.dryStreak += 1;
   }
   else if (roll < goldenChance + bootChance + nothingChance) {
     catchResult = "nothing";
+    bear.dryStreak += 1;
   }
   else {
     catchResult = "fish";
     fishCount += 1;
+    bear.dryStreak = 0;
   }
 }
 
 /**
- * Sky and riverbank
+ * Sky, or a golden flash when you catch the rare one
  */
 function drawBackground() {
-  background(150, 200, 230);
+  if (catchResult === "golden" && catchTimer > 0) {
+    // Flash between gold and orange
+    if (frameCount % 10 < 5) {
+      background(255, 220, 80);
+    }
+    else {
+      background(255, 170, 60);
+    }
+  }
+  else {
+    background(150, 200, 230);
+  }
 
   // Riverbank
   push();
@@ -138,7 +157,7 @@ function drawRiver() {
 }
 
 /**
- * Draw the bear, looking down at the water
+ * Draw the bear, with a face that depends on the last catch
  */
 function drawBear() {
   let earOffset = bear.size * 0.35;
@@ -155,17 +174,88 @@ function drawBear() {
   ellipse(bear.x, bear.y, bear.size);
   fill(40, 25, 20);
   ellipse(bear.x, bear.y + bear.size * 0.08, bear.size * 0.12, bear.size * 0.08);
-  // Eyes looking down at the water
-  fill(0);
-  ellipse(bear.x - eyeOffsetX, eyeY + 4, 10);
-  ellipse(bear.x + eyeOffsetX, eyeY + 4, 10);
   pop();
 
-  // Flat, focused mouth
+  // Pick a mood from the last catch (only while it's showing)
+  let mood = "focused";
+  if (catchTimer > 0) {
+    if (catchResult === "golden") {
+      mood = "amazed";
+    }
+    else if (catchResult === "fish") {
+      mood = "happy";
+    }
+    else if (catchResult === "boot") {
+      mood = "annoyed";
+    }
+    else {
+      mood = "sad";
+    }
+  }
+  // A long dry streak makes him grumpy even between swipes
+  else if (bear.dryStreak >= 3) {
+    mood = "annoyed";
+  }
+
   push();
-  stroke(40, 25, 20);
+  stroke(20);
   strokeWeight(4);
-  line(bear.x - 10, mouthY, bear.x + 10, mouthY);
+  noFill();
+
+  // Eyes
+  if (mood === "amazed") {
+    fill(255);
+    ellipse(bear.x - eyeOffsetX, eyeY, 30);
+    ellipse(bear.x + eyeOffsetX, eyeY, 30);
+    fill(0);
+    ellipse(bear.x - eyeOffsetX, eyeY, 10);
+    ellipse(bear.x + eyeOffsetX, eyeY, 10);
+  }
+  else if (mood === "happy") {
+    arc(bear.x - eyeOffsetX, eyeY, 18, 18, PI, TWO_PI);
+    arc(bear.x + eyeOffsetX, eyeY, 18, 18, PI, TWO_PI);
+  }
+  else if (mood === "annoyed") {
+    // Angry slanted brows over flat eyes
+    line(bear.x - eyeOffsetX - 10, eyeY - 12, bear.x - eyeOffsetX + 8, eyeY - 6);
+    line(bear.x + eyeOffsetX + 10, eyeY - 12, bear.x + eyeOffsetX - 8, eyeY - 6);
+    line(bear.x - eyeOffsetX - 6, eyeY + 2, bear.x - eyeOffsetX + 6, eyeY + 2);
+    line(bear.x + eyeOffsetX - 6, eyeY + 2, bear.x + eyeOffsetX + 6, eyeY + 2);
+  }
+  else if (mood === "sad") {
+    noStroke();
+    fill(0);
+    ellipse(bear.x - eyeOffsetX, eyeY, 10);
+    ellipse(bear.x + eyeOffsetX, eyeY, 10);
+    stroke(20);
+    // Sad brows
+    line(bear.x - eyeOffsetX - 8, eyeY - 8, bear.x - eyeOffsetX + 6, eyeY - 13);
+    line(bear.x + eyeOffsetX + 8, eyeY - 8, bear.x + eyeOffsetX - 6, eyeY - 13);
+  }
+  else {
+    // Focused: eyes looking down at the water
+    noStroke();
+    fill(0);
+    ellipse(bear.x - eyeOffsetX, eyeY + 4, 10);
+    ellipse(bear.x + eyeOffsetX, eyeY + 4, 10);
+  }
+
+  // Mouth
+  stroke(40, 25, 20);
+  noFill();
+  if (mood === "amazed") {
+    fill(80, 20, 30);
+    ellipse(bear.x, mouthY, 24, 30);
+  }
+  else if (mood === "happy") {
+    arc(bear.x, mouthY - 6, 34, 24, 0, PI);
+  }
+  else if (mood === "sad" || mood === "annoyed") {
+    arc(bear.x, mouthY + 6, 30, 18, PI, TWO_PI);
+  }
+  else {
+    line(bear.x - 10, mouthY, bear.x + 10, mouthY);
+  }
   pop();
 }
 
@@ -210,6 +300,11 @@ function drawCatch() {
   textStyle(BOLD);
 
   if (catchResult === "golden") {
+    // Sparkles in random spots around the salmon
+    fill(255, 255, 200);
+    for (let i = 0; i < 12; i++) {
+      ellipse(x + random(-70, 70), y + random(-50, 50), random(3, 8));
+    }
     fill(255, 200, 0);
     ellipse(x, y, 90, 36);
     triangle(x + 40, y, x + 65, y - 20, x + 65, y + 20);
@@ -232,7 +327,7 @@ function drawCatch() {
     rect(x - 15, y - 35, 30, 50, 4);
     rect(x - 15, y + 5, 55, 20, 6);
     fill(255);
-    text("...a boot.", width / 2, 330);
+    text("...a boot?!", width / 2, 330);
   }
   else {
     fill(255);
