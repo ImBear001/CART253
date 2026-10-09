@@ -3,8 +3,14 @@
  * Tyler Myrans
  *
  * The bear is asleep in the cave and you want his honey.
- * Start at the blue circle, go over to the honey, click to grab it,
- * then bring it back to the blue circle to win.
+ * Start at the blue circle, sneak over to the honey, click to grab it,
+ * then sneak it back to the blue circle to win.
+ *
+ * Things that wake him up:
+ * - Moving too fast near him (the meter at the top fills up)
+ * - Stepping on a stick (CRACK!)
+ * Carrying the honey makes you clumsier, so you have to go even slower.
+ * If the meter fills up, he wakes up and it's game over.
  *
  * Uses:
  * p5.js
@@ -23,7 +29,14 @@ let bear = {
     r: 120,
     g: 80,
     b: 50
-  }
+  },
+  // How disturbed he is (0 = deep sleep, 100 = awake)
+  disturbed: 0,
+  maxDisturbed: 100,
+  // How fast he settles back down when you're careful
+  calmRate: 0.3,
+  // How close you have to be for him to hear you
+  hearingDistance: 170
 };
 
 // Where you start (and where you bring the honey back to)
@@ -40,10 +53,33 @@ let honey = {
   size: 36
 };
 
+// Crunchy sticks on the cave floor
+let stickSize = 30;
+let stick1 = {
+  x: 110,
+  y: 170
+};
+let stick2 = {
+  x: 300,
+  y: 190
+};
+let stick3 = {
+  x: 250,
+  y: 350
+};
+let stickNoise = 35;
+
+// How fast you can move before it counts as "too fast"
+let sneakSpeed = 6;
+let carryingSpeed = 3.5;
+
 // Are you holding the honey?
 let hasHoney = false;
 
-// The state of the game: "start", "sneaking", or "won"
+// A "CRACK!" message when you step on a stick
+let crackTimer = 0;
+
+// The state of the game: "start", "sneaking", "caught", or "won"
 let state = "start";
 
 /**
@@ -59,7 +95,9 @@ function setup() {
  * Put everything back to how it starts
  */
 function resetGame() {
+  bear.disturbed = 0;
   hasHoney = false;
+  crackTimer = 0;
   state = "start";
 }
 
@@ -69,19 +107,32 @@ function resetGame() {
 function draw() {
   if (state === "start") {
     drawCave();
+    drawSticks();
     drawBear();
     drawHoney();
     drawStart();
     checkStart();
   }
   else if (state === "sneaking") {
+    updateDisturbance();
+    checkSticks();
     checkWin();
 
     drawCave();
+    drawSticks();
     drawBear();
     drawHoney();
     drawStart();
     drawPlayer();
+    drawMeter();
+    drawCrack();
+
+    if (bear.disturbed >= bear.maxDisturbed) {
+      state = "caught";
+    }
+  }
+  else if (state === "caught") {
+    drawCaught();
   }
   else if (state === "won") {
     drawWon();
@@ -99,6 +150,68 @@ function checkStart() {
 }
 
 /**
+ * Moving fast near the bear disturbs him. Being careful lets him calm down.
+ */
+function updateDisturbance() {
+  // How far the mouse moved since the last frame
+  let speed = dist(mouseX, mouseY, pmouseX, pmouseY);
+  let distanceToBear = dist(mouseX, mouseY, bear.x, bear.y);
+
+  // Carrying the honey makes you clumsier
+  let limit = sneakSpeed;
+  if (hasHoney) {
+    limit = carryingSpeed;
+  }
+
+  if (distanceToBear < bear.hearingDistance && speed > limit) {
+    // Closer and faster = more disturbing
+    let closeness = map(distanceToBear, 0, bear.hearingDistance, 1, 0.2);
+    bear.disturbed += speed * closeness;
+  }
+  else {
+    bear.disturbed -= bear.calmRate;
+  }
+
+  bear.disturbed = constrain(bear.disturbed, 0, bear.maxDisturbed);
+}
+
+/**
+ * Stepping on a stick makes a loud CRACK
+ */
+function checkSticks() {
+  // Only count it on the frame you step onto the stick, not every frame you stand on it
+  let onStickNow = isOnStick(mouseX, mouseY);
+  let onStickBefore = isOnStick(pmouseX, pmouseY);
+
+  if (onStickNow && !onStickBefore) {
+    bear.disturbed += stickNoise;
+    crackTimer = 40;
+  }
+
+  if (crackTimer > 0) {
+    crackTimer -= 1;
+  }
+}
+
+/**
+ * Is this position on top of any of the sticks?
+ */
+function isOnStick(x, y) {
+  if (dist(x, y, stick1.x, stick1.y) < stickSize / 2) {
+    return true;
+  }
+  else if (dist(x, y, stick2.x, stick2.y) < stickSize / 2) {
+    return true;
+  }
+  else if (dist(x, y, stick3.x, stick3.y) < stickSize / 2) {
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
+/**
  * You win if you bring the honey back to the start circle
  */
 function checkWin() {
@@ -109,16 +222,18 @@ function checkWin() {
 }
 
 /**
- * Click on the honey to grab it, or click to play again after you win
+ * Click on the honey to grab it, or click to play again after the game ends
  */
 function mousePressed() {
-  if (state === "won") {
+  if (state === "caught" || state === "won") {
     resetGame();
   }
   else if (state === "sneaking" && !hasHoney) {
     let distance = dist(mouseX, mouseY, honey.x, honey.y);
     if (distance < honey.size) {
       hasHoney = true;
+      // Grabbing it makes a little noise
+      bear.disturbed += 10;
     }
   }
 }
@@ -137,10 +252,38 @@ function drawCave() {
 }
 
 /**
- * Draw the sleeping bear, snoring
+ * Draw the sticks on the floor
+ */
+function drawSticks() {
+  drawStick(stick1.x, stick1.y);
+  drawStick(stick2.x, stick2.y);
+  drawStick(stick3.x, stick3.y);
+}
+
+/**
+ * Draw one stick as a couple of crossed lines
+ */
+function drawStick(x, y) {
+  push();
+  stroke(170, 130, 85);
+  strokeWeight(4);
+  line(x - stickSize / 2, y + 4, x + stickSize / 2, y - 4);
+  strokeWeight(3);
+  line(x - 4, y - 8, x + 6, y + 8);
+  pop();
+}
+
+/**
+ * Draw the sleeping bear. He twitches and opens his eyes
+ * depending on how disturbed he is.
  */
 function drawBear() {
-  let x = bear.x;
+  // Twitch more the more disturbed he is
+  let twitch = 0;
+  if (bear.disturbed > 30) {
+    twitch = random(-1, 1) * map(bear.disturbed, 30, 100, 0, 4);
+  }
+  let x = bear.x + twitch;
   let y = bear.y;
 
   push();
@@ -156,24 +299,44 @@ function drawBear() {
   ellipse(x - 125, y - 10, 14, 10);
   pop();
 
-  // Closed eyes
+  let eyeX1 = x - 105;
+  let eyeX2 = x - 80;
+  let eyeY = y - 28;
+
   push();
   stroke(20);
   strokeWeight(3);
-  noFill();
-  arc(x - 105, y - 28, 12, 8, 0, PI);
-  arc(x - 80, y - 28, 12, 8, 0, PI);
+  if (bear.disturbed >= 80) {
+    // Nearly awake: both eyes open, red
+    fill(255, 80, 60);
+    ellipse(eyeX1, eyeY, 12, 9);
+    ellipse(eyeX2, eyeY, 12, 9);
+  }
+  else if (bear.disturbed >= 50) {
+    // Half awake: slits
+    fill(255);
+    ellipse(eyeX1, eyeY, 12, 4);
+    ellipse(eyeX2, eyeY, 12, 4);
+  }
+  else {
+    // Asleep: closed eyes
+    noFill();
+    arc(eyeX1, eyeY, 12, 8, 0, PI);
+    arc(eyeX2, eyeY, 12, 8, 0, PI);
+  }
   pop();
 
-  // Snoring Zs that float up and down
+  // Snoring Zs only while he's sleeping soundly
   push();
   fill(220);
   noStroke();
-  textSize(18);
-  let floatY = sin(frameCount * 0.05) * 6;
-  text("z", x - 60, y - 90 + floatY);
-  textSize(24);
-  text("Z", x - 40, y - 115 + floatY);
+  if (bear.disturbed < 30) {
+    textSize(18);
+    let floatY = sin(frameCount * 0.05) * 6;
+    text("z", x - 60, y - 90 + floatY);
+    textSize(24);
+    text("Z", x - 40, y - 115 + floatY);
+  }
   pop();
 }
 
@@ -224,6 +387,7 @@ function drawStart() {
   if (state === "start") {
     text("Put your mouse on the blue circle to start.", width / 2, 30);
     text("Click the honey to grab it, then bring it back.", width / 2, 52);
+    text("Don't step on the sticks.", width / 2, 74);
   }
   else if (hasHoney) {
     text("Got it! Now sneak it back to the circle.", width / 2, 80);
@@ -246,6 +410,69 @@ function drawPlayer() {
   ellipse(mouseX - 8, mouseY - 9, 6);
   ellipse(mouseX, mouseY - 11, 6);
   ellipse(mouseX + 8, mouseY - 9, 6);
+  pop();
+}
+
+/**
+ * Draw the disturbance meter at the top
+ */
+function drawMeter() {
+  let barWidth = 200;
+  let filled = map(bear.disturbed, 0, bear.maxDisturbed, 0, barWidth);
+
+  // The bar goes from green to red as he gets more disturbed
+  let r = map(bear.disturbed, 0, bear.maxDisturbed, 80, 230);
+  let g = map(bear.disturbed, 0, bear.maxDisturbed, 200, 50);
+
+  push();
+  noStroke();
+  fill(255, 255, 255, 40);
+  rect(width / 2 - barWidth / 2, 20, barWidth, 14, 7);
+  fill(r, g, 60);
+  rect(width / 2 - barWidth / 2, 20, filled, 14, 7);
+  fill(255);
+  textSize(12);
+  text("how awake he is", width / 2, 48);
+  pop();
+}
+
+/**
+ * Show "CRACK!" for a moment after stepping on a stick
+ */
+function drawCrack() {
+  if (crackTimer <= 0) {
+    return;
+  }
+  push();
+  fill(255, 230, 120);
+  noStroke();
+  textSize(28);
+  textStyle(BOLD);
+  text("CRACK!", mouseX, mouseY - 30);
+  pop();
+}
+
+/**
+ * Game over screen
+ */
+function drawCaught() {
+  background(140, 20, 20);
+  push();
+  // The bear's angry eyes filling the screen
+  noStroke();
+  fill(255, 220, 0);
+  ellipse(130, 170, 90, 60);
+  ellipse(270, 170, 90, 60);
+  fill(0);
+  ellipse(130, 170, 20, 50);
+  ellipse(270, 170, 20, 50);
+  fill(255);
+  textSize(36);
+  textStyle(BOLD);
+  text("HE'S AWAKE.", width / 2, 280);
+  textSize(16);
+  textStyle(NORMAL);
+  text("Click to try again", width / 2, 320);
   pop();
 }
 
