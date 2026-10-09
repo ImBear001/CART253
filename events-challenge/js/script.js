@@ -3,6 +3,8 @@
  * Pippin Barr
  *
  * A game where your score increases so long as you do nothing.
+ * Every event (keyboard, mouse, internet, focus) calls the same
+ * lose() function using Plain JavaScript events.
  */
 
 "use strict";
@@ -14,16 +16,28 @@ let score = 0;
 let gameOver = false;
 
 /**
- * Create the canvas
+ * Create the canvas and listen for every event that makes you lose
  */
 function setup() {
   createCanvas(400, 400);
 
-  // Lose if the internet connection changes (Plain JavaScript events)
+  // Keyboard events
+  window.addEventListener("keydown", lose);
+  window.addEventListener("keyup", lose);
+
+  // Mouse events
+  window.addEventListener("mousemove", lose);
+  window.addEventListener("mousedown", lose);
+  window.addEventListener("mouseup", lose);
+  window.addEventListener("click", lose);
+  window.addEventListener("dblclick", lose);
+  window.addEventListener("wheel", lose);
+
+  // Internet connection events
   window.addEventListener("online", lose);
   window.addEventListener("offline", lose);
 
-  // Lose if you switch tabs or minimize the window
+  // Switching tabs or minimizing the window
   document.addEventListener("visibilitychange", lose);
 }
 
@@ -69,82 +83,8 @@ function displayScore() {
 }
 
 /**
- * Ends the game
+ * Ends the game (every event calls this)
  */
 function lose() {
   gameOver = true;
-}
-
-// Keyboard events: any key action makes you lose
-
-/**
- * Lose when a key is pressed
- */
-function keyPressed() {
-  lose();
-}
-
-/**
- * Lose when a key is released
- */
-function keyReleased() {
-  lose();
-}
-
-/**
- * Lose when a key is typed
- */
-function keyTyped() {
-  lose();
-}
-
-// Mouse events: any mouse action makes you lose
-
-/**
- * Lose when the mouse moves
- */
-function mouseMoved() {
-  lose();
-}
-
-/**
- * Lose when the mouse is dragged
- */
-function mouseDragged() {
-  lose();
-}
-
-/**
- * Lose when a mouse button is pressed
- */
-function mousePressed() {
-  lose();
-}
-
-/**
- * Lose when a mouse button is released
- */
-function mouseReleased() {
-  lose();
-}
-
-/**
- * Lose when the mouse is clicked
- */
-function mouseClicked() {
-  lose();
-}
-
-/**
- * Lose when the mouse is double clicked
- */
-function doubleClicked() {
-  lose();
-}
-
-/**
- * Lose when the mouse wheel is scrolled
- */
-function mouseWheel() {
-  lose();
 }
