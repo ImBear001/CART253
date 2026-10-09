@@ -45,3 +45,18 @@ The most annoying part was honestly just getting things to work the way I wanted
 Something’s Out There was probably the one I enjoyed the most. The first version felt pretty boring to me, but changing it so the flashlight pushes the eyes back made it way more interesting. I like that the player has to look around and react instead of just watching.
 
 If I developed one further, I’d choose Something’s Out There. I’d add more things to discover and make the cave feel even more unpredictable. I’d want someone playing it to feel curious, but also a little uncomfortable, like something could be hiding just outside the flashlight.
+
+
+   ## Prototyping Conditionals
+
+![Don't Wake Him](prototypes-conditionals/dont-wake-him/screenshotdontwakehim.png)
+
+Working on these three prototypes made me realize how one small change can completely change the way a game feels. I thought getting the basic mechanics working would be the hardest part, but honestly, getting them to behave the way I imagined was a whole different story.
+
+Picky Bear was probably the most frustrating because of the little things that refused to work properly. The honey was there, I could see it, but actually reaching it was a different problem. The stuffed state also never triggered the way I expected it to. It was annoying because, in my head, the logic made perfect sense. It made me realize that just because I understand what should happen doesn't mean the computer does.
+
+In Lucky Catch, changing the golden salmon to a 1-in-30 chance was interesting because it made finding one feel like an actual event instead of something that happens constantly. Rarity gives the player a reason to keep fishing, although I can see how making something too rare could get frustrating if the reward doesn't feel worth it.
+
+Don't Wake Him was the one I became more interested in developing. At first, it felt like the idea was a little too simple, and I wanted the player to have more to do than just avoid waking the bear. Adding the peeking mechanic, sticks, and carrying honey gave the player more decisions to make. Suddenly, even a simple action could feel risky. I like the idea that the player has to think about every movement instead of just rushing toward an objective.
+
+If I could keep developing one, I'd choose Don't Wake Him. I would turn it into a stealth game where the bear slowly learns your habits, forcing you to change your strategy every time you enter the cave. Maybe the bear isn't even the only thing you need to worry about. I think there's something funny and genuinely tense about being a tiny animal trying to steal honey from something that could wake up at any second. These prototypes showed me that the most interesting part of making a game isn't always adding more stuff; sometimes it's making a small mechanic matter.
