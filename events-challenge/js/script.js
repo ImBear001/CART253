@@ -18,6 +18,13 @@ let gameOver = false;
  */
 function setup() {
   createCanvas(400, 400);
+
+  // Lose if the internet connection changes (Plain JavaScript events)
+  window.addEventListener("online", lose);
+  window.addEventListener("offline", lose);
+
+  // Lose if you switch tabs or minimize the window
+  document.addEventListener("visibilitychange", lose);
 }
 
 /**
