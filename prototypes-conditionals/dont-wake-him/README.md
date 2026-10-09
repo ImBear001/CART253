@@ -1,23 +1,30 @@
-# TITLE OF PROJECT
+## Prototyping: Conditionals
 
-AUTHOR NAME
+Three Bear Cave prototypes, each using conditionals to give the bear choices, luck, and consequences.
 
-[View this project online](URL_FOR_THE_RUNNING_PROJECT)
+### Picky Bear
+![Picky Bear](prototypes-conditionals/picky-bear/screenshotpickybear.png)
 
-## Description
+Pick up a food from the table and feed it to the bear. He reacts differently to each one: he loves honey, likes fish, isn't sure about berries, and is grossed out by garbage. Feed him too much and he gets stuffed, so you have to wait for him to digest.
 
-This description should help the reader understand what the program is, anything they should know to be able to experience it (controls, special features, etc.), and what the desired user experience is. For example:
+- [Run it](https://imbear001.github.io/CART253/prototypes-conditionals/picky-bear/)
+- [Code](https://github.com/ImBear001/CART253/tree/main/prototypes-conditionals/picky-bear)
 
-## Attribution
+### Lucky Catch
+![Lucky Catch](prototypes-conditionals/lucky-catch/screenshotluckycatch.png)
 
-This bit should attribute any code, assets or other elements used taken from other sources. For example:
+Click to swipe the bear's paw into the river. A random roll decides what comes out: a fish, a boot, nothing, or a rare (about 1 in 30) golden salmon. His face changes with each catch, and he gets grumpy after a long dry streak.
 
-> - This project uses [p5.js](https://p5js.org).
-> - The clown image is a capture of the clown from the Apple emoji character set.
-> - The barking sound effect is "single dog bark 1" by crazymonke9 from freesound.org: https://freesound.org/people/crazymonke9/sounds/418107/
+- [Run it](https://imbear001.github.io/CART253/prototypes-conditionals/lucky-catch/)
+- [Code](https://github.com/ImBear001/CART253/tree/main/prototypes-conditionals/lucky-catch)
 
-## License
+### Don't Wake Him
+![Don't Wake Him](prototypes-conditionals/dont-wake-him/screenshotdontwakehim.png)
 
-This bit could include the license you want to apply to your work. For example:
+Sneak in, grab the sleeping bear's honey, and bring it back to the start circle. Moving fast, stepping on sticks, or moving while he's peeking all disturb him. Fill his meter and you get caught.
 
-> This project is licensed under a Creative Commons Attribution ([CC BY 4.0](https://creativecommons.org/licenses/by/4.0/deed.en)) license with the exception of libraries and other components with their own licenses.
+- [Run it](https://imbear001.github.io/CART253/prototypes-conditionals/dont-wake-him/)
+- [Code](https://github.com/ImBear001/CART253/tree/main/prototypes-conditionals/dont-wake-him)
+
+### Journal
+- [Journal entry: Prototyping Conditionals](journal.md#prototyping-conditionals)
