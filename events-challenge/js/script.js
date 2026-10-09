@@ -52,4 +52,92 @@ function displayUI() {
 /**
  * Display the score
  */
-function
+function displayScore() {
+  push();
+  textSize(48);
+  textStyle(BOLD);
+  textAlign(CENTER, CENTER);
+  text(floor(score), width/2, height/2);
+  pop();
+}
+
+/**
+ * Ends the game
+ */
+function lose() {
+  gameOver = true;
+}
+
+// Keyboard events: any key action makes you lose
+
+/**
+ * Lose when a key is pressed
+ */
+function keyPressed() {
+  lose();
+}
+
+/**
+ * Lose when a key is released
+ */
+function keyReleased() {
+  lose();
+}
+
+/**
+ * Lose when a key is typed
+ */
+function keyTyped() {
+  lose();
+}
+
+// Mouse events: any mouse action makes you lose
+
+/**
+ * Lose when the mouse moves
+ */
+function mouseMoved() {
+  lose();
+}
+
+/**
+ * Lose when the mouse is dragged
+ */
+function mouseDragged() {
+  lose();
+}
+
+/**
+ * Lose when a mouse button is pressed
+ */
+function mousePressed() {
+  lose();
+}
+
+/**
+ * Lose when a mouse button is released
+ */
+function mouseReleased() {
+  lose();
+}
+
+/**
+ * Lose when the mouse is clicked
+ */
+function mouseClicked() {
+  lose();
+}
+
+/**
+ * Lose when the mouse is double clicked
+ */
+function doubleClicked() {
+  lose();
+}
+
+/**
+ * Lose when the mouse wheel is scrolled
+ */
+function mouseWheel() {
+  lose();
+}
