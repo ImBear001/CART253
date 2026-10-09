@@ -9,6 +9,7 @@
  * Things that wake him up:
  * - Moving too fast near him (the meter at the top fills up)
  * - Stepping on a stick (CRACK!)
+ * - Moving while he's peeking (he twitches an ear first as a warning)
  * Carrying the honey makes you clumsier, so you have to go even slower.
  * If the meter fills up, he wakes up and it's game over.
  *
@@ -36,7 +37,12 @@ let bear = {
   // How fast he settles back down when you're careful
   calmRate: 0.3,
   // How close you have to be for him to hear you
-  hearingDistance: 170
+  hearingDistance: 170,
+  // Peeking: "sleeping", "warning" (ear twitch), or "peeking" (one eye open)
+  peekState: "sleeping",
+  peekTimer: 0,
+  warningLength: 45,
+  peekLength: 70
 };
 
 // Where you start (and where you bring the honey back to)
@@ -96,6 +102,8 @@ function setup() {
  */
 function resetGame() {
   bear.disturbed = 0;
+  bear.peekState = "sleeping";
+  bear.peekTimer = random(180, 360);
   hasHoney = false;
   crackTimer = 0;
   state = "start";
@@ -114,6 +122,7 @@ function draw() {
     checkStart();
   }
   else if (state === "sneaking") {
+    updatePeek();
     updateDisturbance();
     checkSticks();
     checkWin();
@@ -150,7 +159,33 @@ function checkStart() {
 }
 
 /**
- * Moving fast near the bear disturbs him. Being careful lets him calm down.
+ * Every so often the bear twitches an ear (warning), then peeks.
+ * Then he goes back to sleep and waits a random amount of time.
+ */
+function updatePeek() {
+  bear.peekTimer -= 1;
+
+  if (bear.peekTimer > 0) {
+    return;
+  }
+
+  if (bear.peekState === "sleeping") {
+    bear.peekState = "warning";
+    bear.peekTimer = bear.warningLength;
+  }
+  else if (bear.peekState === "warning") {
+    bear.peekState = "peeking";
+    bear.peekTimer = bear.peekLength;
+  }
+  else {
+    bear.peekState = "sleeping";
+    bear.peekTimer = random(180, 360);
+  }
+}
+
+/**
+ * Moving fast near the bear disturbs him. Moving at all while he's
+ * peeking disturbs him a lot. Being careful lets him calm down.
  */
 function updateDisturbance() {
   // How far the mouse moved since the last frame
@@ -163,7 +198,11 @@ function updateDisturbance() {
     limit = carryingSpeed;
   }
 
-  if (distanceToBear < bear.hearingDistance && speed > limit) {
+  if (bear.peekState === "peeking" && speed > 0.5) {
+    // He saw you move!
+    bear.disturbed += 6;
+  }
+  else if (distanceToBear < bear.hearingDistance && speed > limit) {
     // Closer and faster = more disturbing
     let closeness = map(distanceToBear, 0, bear.hearingDistance, 1, 0.2);
     bear.disturbed += speed * closeness;
@@ -274,7 +313,7 @@ function drawStick(x, y) {
 }
 
 /**
- * Draw the sleeping bear. He twitches and opens his eyes
+ * Draw the sleeping bear. He twitches, peeks, and opens his eyes
  * depending on how disturbed he is.
  */
 function drawBear() {
@@ -286,6 +325,12 @@ function drawBear() {
   let x = bear.x + twitch;
   let y = bear.y;
 
+  // An ear flicks up when he's about to peek
+  let earLift = 0;
+  if (bear.peekState === "warning") {
+    earLift = sin(frameCount * 0.6) * 6;
+  }
+
   push();
   noStroke();
   fill(bear.fill.r, bear.fill.g, bear.fill.b);
@@ -294,7 +339,7 @@ function drawBear() {
   // Head resting on the left
   ellipse(x - 90, y - 20, 90, 80);
   ellipse(x - 115, y - 55, 28);
-  ellipse(x - 70, y - 58, 28);
+  ellipse(x - 70, y - 58 - abs(earLift), 28);
   fill(40, 25, 20);
   ellipse(x - 125, y - 10, 14, 10);
   pop();
@@ -312,6 +357,18 @@ function drawBear() {
     ellipse(eyeX1, eyeY, 12, 9);
     ellipse(eyeX2, eyeY, 12, 9);
   }
+  else if (bear.peekState === "peeking") {
+    // Peeking: one eye open, looking at you
+    noFill();
+    arc(eyeX1, eyeY, 12, 8, 0, PI);
+    fill(255);
+    ellipse(eyeX2, eyeY, 13, 11);
+    fill(0);
+    noStroke();
+    let lookX = constrain((mouseX - eyeX2) * 0.02, -3, 3);
+    let lookY = constrain((mouseY - eyeY) * 0.02, -2, 2);
+    ellipse(eyeX2 + lookX, eyeY + lookY, 5);
+  }
   else if (bear.disturbed >= 50) {
     // Half awake: slits
     fill(255);
@@ -326,11 +383,20 @@ function drawBear() {
   }
   pop();
 
-  // Snoring Zs only while he's sleeping soundly
+  // Speech while he's checking on you
   push();
   fill(220);
   noStroke();
-  if (bear.disturbed < 30) {
+  if (bear.peekState === "warning") {
+    textSize(16);
+    text("hm?", x - 60, y - 100);
+  }
+  else if (bear.peekState === "peeking") {
+    textSize(16);
+    text("...", x - 60, y - 100);
+  }
+  else if (bear.disturbed < 30) {
+    // Snoring Zs only while he's sleeping soundly
     textSize(18);
     let floatY = sin(frameCount * 0.05) * 6;
     text("z", x - 60, y - 90 + floatY);
@@ -387,7 +453,7 @@ function drawStart() {
   if (state === "start") {
     text("Put your mouse on the blue circle to start.", width / 2, 30);
     text("Click the honey to grab it, then bring it back.", width / 2, 52);
-    text("Don't step on the sticks.", width / 2, 74);
+    text("Avoid sticks. Freeze when he peeks.", width / 2, 74);
   }
   else if (hasHoney) {
     text("Got it! Now sneak it back to the circle.", width / 2, 80);
@@ -432,7 +498,12 @@ function drawMeter() {
   rect(width / 2 - barWidth / 2, 20, filled, 14, 7);
   fill(255);
   textSize(12);
-  text("how awake he is", width / 2, 48);
+  if (bear.peekState === "peeking") {
+    text("HE'S LOOKING. DON'T MOVE.", width / 2, 48);
+  }
+  else {
+    text("how awake he is", width / 2, 48);
+  }
   pop();
 }
 
