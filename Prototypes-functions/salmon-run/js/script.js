@@ -20,6 +20,8 @@ let caught = 0;
 
 // Counts down after a catch so the bear smiles for a moment
 let chompTimer = 0;
+// The splash that appears when a salmon is caught
+let splash = undefined;
 
 /**
  * Creates the canvas and the three salmon
@@ -30,6 +32,9 @@ function setup() {
     salmonA = createSalmon();
     salmonB = createSalmon();
     salmonC = createSalmon();
+    // An empty splash to start, so there is nothing to draw yet
+    splash = createSplash(0, 0);
+    splash.life = 0;
 }
 
 /**
@@ -45,6 +50,7 @@ function draw() {
     drawSalmon(salmonA);
     drawSalmon(salmonB);
     drawSalmon(salmonC);
+     drawSplash(splash);
 
     drawBear();
     drawScore();
@@ -79,12 +85,13 @@ function drawRiver() {
 }
 
 /**
- * Draws the bear's head on the bank, mouth open because he's hungry
+  * Draws the bear's head on the bank, getting bigger the more he eats
  */
 function drawBear() {
-    const x = width - 70;
+    // The bear gets chubbier with every salmon (but not forever)
+    const size = min(90 + caught * 4, 160);
+    const x = width - 20 - size / 2;
     const y = 180;
-    const size = 90;
 
     push();
     noStroke();
@@ -221,6 +228,7 @@ function checkCatch(salmon) {
     if (isClicked(salmon)) {
         caught += 1;
         chompTimer = 15;
+         splash = createSplash(salmon.x, salmon.y);
         resetSalmon(salmon);
     }
 }
@@ -245,4 +253,49 @@ function drawScore() {
     textAlign(LEFT, TOP);
     text("Salmon caught: " + caught, 18, 16);
     pop();
+}
+
+/**
+ * Returns a new splash at the position passed in
+ */
+function createSplash(x, y) {
+    const splash = {
+        x: x,
+        y: y,
+        radius: 10,
+        life: 30
+    };
+    return splash;
+}
+
+/**
+ * Draws the splash passed in as a growing ring with droplets
+ * flying out, fading away as its life runs out
+ */
+function drawSplash(splash) {
+    if (splash.life <= 0) {
+        return;
+    }
+
+    const fade = map(splash.life, 0, 30, 0, 255);
+
+    push();
+    noFill();
+    stroke(255, 255, 255, fade);
+    strokeWeight(4);
+    ellipse(splash.x, splash.y, splash.radius * 2);
+
+    // Droplets flying out in a circle
+    noStroke();
+    fill(180, 225, 255, fade);
+    for (let i = 0; i < 8; i++) {
+        const angle = i * TWO_PI / 8;
+        const dropX = splash.x + cos(angle) * splash.radius * 1.4;
+        const dropY = splash.y + sin(angle) * splash.radius * 1.4;
+        ellipse(dropX, dropY, 8);
+    }
+    pop();
+
+    splash.radius += 3;
+    splash.life -= 1;
 }
