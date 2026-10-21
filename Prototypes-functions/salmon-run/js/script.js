@@ -15,6 +15,12 @@ let salmonA = undefined;
 let salmonB = undefined;
 let salmonC = undefined;
 
+// How many salmon the bear has eaten
+let caught = 0;
+
+// Counts down after a catch so the bear smiles for a moment
+let chompTimer = 0;
+
 /**
  * Creates the canvas and the three salmon
  */
@@ -41,6 +47,7 @@ function draw() {
     drawSalmon(salmonC);
 
     drawBear();
+    drawScore();
 }
 
 /**
@@ -101,9 +108,18 @@ function drawBear() {
     ellipse(x - size * 0.19, y - size * 0.08, size * 0.08);
     ellipse(x + size * 0.19, y - size * 0.08, size * 0.08);
 
-    // Open hungry mouth
-    fill(120, 30, 30);
-    ellipse(x, y + size * 0.24, size * 0.1, size * 0.09);
+    // Mouth: a happy smile right after a catch, otherwise open and hungry
+    if (chompTimer > 0) {
+        noFill();
+        stroke(35, 22, 15);
+        strokeWeight(3);
+        arc(x, y + size * 0.22, size * 0.16, size * 0.1, 0, PI);
+        chompTimer -= 1;
+    }
+    else {
+        fill(120, 30, 30);
+        ellipse(x, y + size * 0.24, size * 0.1, size * 0.09);
+    }
     pop();
 }
 
@@ -186,5 +202,47 @@ function drawSalmon(salmon) {
     ellipse(salmon.size * 0.28, -salmon.size * 0.05, salmon.size * 0.1);
     fill(20);
     ellipse(salmon.size * 0.3, -salmon.size * 0.05, salmon.size * 0.05);
+    pop();
+}
+
+/**
+ * Returns true if the mouse is on the salmon passed in
+ */
+function isClicked(salmon) {
+    const distance = dist(mouseX, mouseY, salmon.x, salmon.y);
+    return distance < salmon.size * 0.6;
+}
+
+/**
+ * Catches the salmon passed in if it was clicked: adds a point,
+ * makes the bear chomp, and sends the salmon back into the river
+ */
+function checkCatch(salmon) {
+    if (isClicked(salmon)) {
+        caught += 1;
+        chompTimer = 15;
+        resetSalmon(salmon);
+    }
+}
+
+/**
+ * Checks every salmon for a catch when the mouse is clicked
+ */
+function mousePressed() {
+    checkCatch(salmonA);
+    checkCatch(salmonB);
+    checkCatch(salmonC);
+}
+
+/**
+ * Draws how many salmon the bear has eaten
+ */
+function drawScore() {
+    push();
+    noStroke();
+    fill(255);
+    textSize(22);
+    textAlign(LEFT, TOP);
+    text("Salmon caught: " + caught, 18, 16);
     pop();
 }
