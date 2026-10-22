@@ -20,9 +20,7 @@ let happyButton = undefined;
 let hungryButton = undefined;
 let sleepyButton = undefined;
 let grumpyButton = undefined;
-/**
- * Creates the canvas
- */
+
 /**
  * Creates the canvas and the four mood buttons
  */
@@ -153,7 +151,7 @@ function drawPawprint(x, y, angle) {
 }
 
 /**
- *  * Draws the bear sitting in the cave at the position and size passed in,
+ * Draws the bear sitting in the cave at the position and size passed in,
  * with a face that matches the mood passed in. He slowly breathes in and out.
  */
 function drawBear(x, y, size, mood) {
@@ -195,7 +193,7 @@ function drawBear(x, y, size, mood) {
     fill(35, 22, 15);
     ellipse(x, y + size * 0.09, size * 0.14, size * 0.09);
 
-       pop();
+    pop();
 
     // The face changes with his mood
     drawEyes(x, y, size, mood);
