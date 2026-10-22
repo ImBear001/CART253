@@ -10,7 +10,10 @@
  */
 
 "use strict";
-
+// The bear and how he is feeling
+const bear = {
+    mood: "happy"
+};
 /**
  * Creates the canvas
  */
@@ -23,7 +26,7 @@ function setup() {
  */
 function draw() {
     drawCave();
-    drawBear(width / 2, 150, 130);
+    drawBear(width / 2, 150, 130, bear.mood);
 }
 
 /**
@@ -132,10 +135,10 @@ function drawPawprint(x, y, angle) {
 }
 
 /**
- * Draws the bear sitting in the cave at the position and size passed in.
- * He slowly breathes in and out so he looks alive.
+ *  * Draws the bear sitting in the cave at the position and size passed in,
+ * with a face that matches the mood passed in. He slowly breathes in and out.
  */
-function drawBear(x, y, size) {
+function drawBear(x, y, size, mood) {
     // Breathing: the bear grows and shrinks a tiny bit over time
     const breath = sin(frameCount * 0.05) * size * 0.02;
     const bodySize = size * 1.3 + breath;
@@ -174,15 +177,136 @@ function drawBear(x, y, size) {
     fill(35, 22, 15);
     ellipse(x, y + size * 0.09, size * 0.14, size * 0.09);
 
-    // Eyes
-    fill(25, 15, 10);
-    ellipse(x - size * 0.19, y - size * 0.08, size * 0.08);
-    ellipse(x + size * 0.19, y - size * 0.08, size * 0.08);
+       pop();
 
-    // Smile
+    // The face changes with his mood
+    drawEyes(x, y, size, mood);
+    drawMouth(x, y, size, mood);
+    drawMoodExtras(x, y, size, mood); 
+}
+
+/**
+ * Draws the bear's eyes for the mood passed in
+ */
+function drawEyes(x, y, size, mood) {
+    const eyeX = size * 0.19;
+    const eyeY = y - size * 0.08;
+
+    push();
+    fill(25, 15, 10);
+    stroke(25, 15, 10);
+    strokeWeight(size * 0.03);
+
+    if (mood === "sleepy") {
+        // Closed, droopy eyes
+        noFill();
+        arc(x - eyeX, eyeY, size * 0.12, size * 0.06, 0, PI);
+        arc(x + eyeX, eyeY, size * 0.12, size * 0.06, 0, PI);
+    }
+    else if (mood === "grumpy") {
+        // Small eyes with angry eyebrows
+        noStroke();
+        ellipse(x - eyeX, eyeY + size * 0.02, size * 0.07);
+        ellipse(x + eyeX, eyeY + size * 0.02, size * 0.07);
+        stroke(25, 15, 10);
+        line(x - eyeX - size * 0.07, eyeY - size * 0.08, x - eyeX + size * 0.06, eyeY - size * 0.03);
+        line(x + eyeX + size * 0.07, eyeY - size * 0.08, x + eyeX - size * 0.06, eyeY - size * 0.03);
+    }
+    else {
+        // Normal round eyes with a little shine
+        noStroke();
+        ellipse(x - eyeX, eyeY, size * 0.08);
+        ellipse(x + eyeX, eyeY, size * 0.08);
+        fill(255);
+        ellipse(x - eyeX + size * 0.015, eyeY - size * 0.015, size * 0.025);
+        ellipse(x + eyeX + size * 0.015, eyeY - size * 0.015, size * 0.025);
+    }
+    pop();
+}
+
+/**
+ * Draws the bear's mouth for the mood passed in
+ */
+function drawMouth(x, y, size, mood) {
+    const mouthY = y + size * 0.22;
+
+    push();
     noFill();
     stroke(25, 15, 10);
     strokeWeight(size * 0.03);
-    arc(x, y + size * 0.22, size * 0.16, size * 0.1, 0, PI);
+
+    if (mood === "happy") {
+        // Smile
+        arc(x, mouthY, size * 0.16, size * 0.1, 0, PI);
+    }
+    else if (mood === "grumpy") {
+        // Frown
+        arc(x, mouthY + size * 0.05, size * 0.16, size * 0.08, PI, TWO_PI);
+    }
+    else if (mood === "hungry") {
+        // Open mouth with a tongue
+        noStroke();
+        fill(120, 30, 30);
+        ellipse(x, mouthY + size * 0.02, size * 0.1, size * 0.09);
+        fill(230, 110, 120);
+        ellipse(x, mouthY + size * 0.05, size * 0.07, size * 0.035);
+    }
+    else {
+        // Flat, tired mouth
+        line(x - size * 0.05, mouthY + size * 0.02, x + size * 0.05, mouthY + size * 0.02);
+    }
+    pop();
+}
+
+/**
+ * Draws the little extra that goes with each mood:
+ * blush when happy, drool when hungry, Zzz when sleepy
+ * and an anger mark when grumpy
+ */
+function drawMoodExtras(x, y, size, mood) {
+    push();
+    noStroke();
+
+    if (mood === "happy") {
+        // Pink cheeks
+        fill(235, 120, 120, 120);
+        ellipse(x - size * 0.3, y + size * 0.08, size * 0.14, size * 0.08);
+        ellipse(x + size * 0.3, y + size * 0.08, size * 0.14, size * 0.08);
+    }
+    else if (mood === "hungry") {
+        // A drop of drool that slowly stretches down
+        const drip = (frameCount % 60) / 60;
+        fill(170, 210, 240, 200);
+        ellipse(x + size * 0.03, y + size * 0.3 + drip * size * 0.08, size * 0.04, size * 0.06 + drip * size * 0.05);
+    }
+    else if (mood === "sleepy") {
+        // Zzz floating up from his head
+        fill(255, 255, 255, 200);
+        textStyle(BOLD);
+        const bob = sin(frameCount * 0.05) * 6;
+        textSize(size * 0.16);
+        text("z", x + size * 0.5, y - size * 0.35 + bob);
+        textSize(size * 0.22);
+        text("z", x + size * 0.65, y - size * 0.55 + bob);
+        textSize(size * 0.3);
+        text("Z", x + size * 0.82, y - size * 0.8 + bob);
+    }
+    else if (mood === "grumpy") {
+        // A red anger mark that pulses
+        const pulse = 1 + sin(frameCount * 0.2) * 0.15;
+        stroke(220, 50, 50);
+        strokeWeight(size * 0.035);
+        const markX = x + size * 0.42;
+        const markY = y - size * 0.42;
+        const m = size * 0.07 * pulse;
+        line(markX - m, markY - m * 0.3, markX - m * 0.3, markY - m * 0.3);
+        line(markX - m * 0.3, markY - m * 0.3, markX - m * 0.3, markY - m);
+        line(markX + m, markY - m * 0.3, markX + m * 0.3, markY - m * 0.3);
+        line(markX + m * 0.3, markY - m * 0.3, markX + m * 0.3, markY - m);
+        line(markX - m, markY + m * 0.3, markX - m * 0.3, markY + m * 0.3);
+        line(markX - m * 0.3, markY + m * 0.3, markX - m * 0.3, markY + m);
+        line(markX + m, markY + m * 0.3, markX + m * 0.3, markY + m * 0.3);
+        line(markX + m * 0.3, markY + m * 0.3, markX + m * 0.3, markY + m);
+    }
     pop();
 }
