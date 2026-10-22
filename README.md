@@ -95,6 +95,37 @@ Sneak in, grab the sleeping bear's honey, and bring it back to the start circle.
 ### Journal
 - [Journal entry: Prototyping Conditionals](journal.md#prototyping-conditionals)
 
+## Prototyping: Events
+
+Three Bear Cave prototypes where the bear responds to what you do: mashing keys, typing to him, and even leaving him alone.
+
+### Wake Up Bear Spam
+![Wake Up Bear Spam](prototypes-events/wake-up-bear-spam/wakeupbearspamscreenshot.png)
+
+The bear is hibernating and you need him up. Mash any key to wake him a little more each time, but stop and he drifts right back to sleep. Fill the meter and he stands up roaring "WHO WOKE ME UP?!" Uses keyPressed(), which fires once per press, so you have to keep hammering.
+
+- [Run it](https://imbear001.github.io/CART253/prototypes-events/wake-up-bear-spam/)
+- [Code](https://github.com/ImBear001/CART253/tree/main/prototypes-events/wake-up-bear-spam)
+
+### Dear Bear
+![Dear Bear](prototypes-events/dear-bear/dearbearscreenshot.png)
+
+Type a letter to the bear and press ENTER to send it. He reacts to what you wrote: honey makes him drool, bees make him panic, saying bye makes him cry, and anything he doesn't understand gets a confused head tilt. Uses keyTyped() for the letters and keyPressed() for BACKSPACE and ENTER.
+
+- [Run it](https://imbear001.github.io/CART253/prototypes-events/dear-bear/)
+- [Code](https://github.com/ImBear001/CART253/tree/main/prototypes-events/dear-bear)
+
+### Don't Leave Me
+![Don't Leave Me](prototypes-events/dont-leave-me/Donttleavemescreenshot.png)
+
+A very clingy bear. His eyes follow your mouse and you can pet him. Move your mouse off the canvas and he panics while the room goes cold. Switch browser tabs and he cries and tells you how long you were gone. Resize the window and he gets squished. Uses mouse events, canvas mouseOver()/mouseOut(), windowResized() and the browser's visibilitychange event.
+
+- [Run it](https://imbear001.github.io/CART253/prototypes-events/dont-leave-me/)
+- [Code](https://github.com/ImBear001/CART253/tree/main/prototypes-events/dont-leave-me)
+
+### Journal
+- [Journal entry: Prototyping Events](journal.md#prototyping-events)
+
 ## Prototyping: Functions
 
 Three Bear Cave prototypes exploring functions: parameters, return values and refactoring repeated code.
