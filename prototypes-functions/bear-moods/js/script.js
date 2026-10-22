@@ -1,5 +1,5 @@
 /**
- * Bear Says
+ * Bear Moods
  * Tyler Myrans
  *
  * A memory game in the Bear Cave. The bear acts out a sequence of moods
