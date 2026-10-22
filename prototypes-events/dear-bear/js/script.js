@@ -14,6 +14,12 @@
 
 "use strict";
 
+// The letter the player is typing right now
+let letter = "";
+
+// The longest letter the bear will read
+const maxLetterLength = 60;
+
 // What the bear says
 let reply = "Write me a letter!";
 
@@ -32,6 +38,27 @@ function draw() {
     drawBear(width / 2, 165, 150);
     drawSpeechBubble();
     drawLetter();
+}
+
+/**
+ * Adds every letter, number and space the player types to the letter
+ */
+function keyTyped() {
+    if (letter.length < maxLetterLength && key !== "Enter") {
+        letter += key;
+    }
+    // Stop the browser doing anything else with the key (like scrolling on space)
+    return false;
+}
+
+/**
+ * Handles BACKSPACE, which deletes the last letter
+ */
+function keyPressed() {
+    if (keyCode === BACKSPACE) {
+        letter = letter.slice(0, -1);
+        return false;
+    }
 }
 
 /**
@@ -83,12 +110,13 @@ function drawBear(x, y, size) {
 }
 
 /**
- * Draws the bear's eyes and smile
+ * Draws the bear's eyes and smile. His eyes follow the end
+ * of the letter as you type.
  */
 function drawFace(size) {
     const eyeX = size * 0.19;
     const eyeY = -size * 0.08;
-    const lookX = 0;
+    const lookX = map(letter.length, 0, maxLetterLength, -size * 0.03, size * 0.03);
 
     push();
     noStroke();
@@ -121,7 +149,8 @@ function drawSpeechBubble() {
 }
 
 /**
- * Draws the piece of paper the letter will be written on
+ * Draws the piece of paper with the letter being typed on it,
+ * with a blinking cursor at the end
  */
 function drawLetter() {
     push();
@@ -139,5 +168,18 @@ function drawLetter() {
     textSize(13);
     text("Dear Bear,", 80, 352);
 
+    // The letter itself, with a blinking cursor
+    textSize(17);
+    let cursor = "";
+    if (frameCount % 60 < 30) {
+        cursor = "|";
+    }
+    text(letter + cursor, 80, 398);
+
+    // How much room is left
+    fill(150, 130, 110);
+    textSize(11);
+    textAlign(RIGHT);
+    text(letter.length + "/" + maxLetterLength, 528, 420);
     pop();
 }
