@@ -60,3 +60,18 @@ In Lucky Catch, changing the golden salmon to a 1-in-30 chance was interesting b
 Don't Wake Him was the one I became more interested in developing. At first, it felt like the idea was a little too simple, and I wanted the player to have more to do than just avoid waking the bear. Adding the peeking mechanic, sticks, and carrying honey gave the player more decisions to make. Suddenly, even a simple action could feel risky. I like the idea that the player has to think about every movement instead of just rushing toward an objective.
 
 If I could keep developing one, I'd choose Don't Wake Him. I would turn it into a stealth game where the bear slowly learns your habits, forcing you to change your strategy every time you enter the cave. Maybe the bear isn't even the only thing you need to worry about. I think there's something funny and genuinely tense about being a tiny animal trying to steal honey from something that could wake up at any second. These prototypes showed me that the most interesting part of making a game isn't always adding more stuff; sometimes it's making a small mechanic matter.
+
+## Prototyping Functions
+![Salmon Run](Prototypes-functions/salmon-run/salmonrunscreenshot.png)
+![Bear Says](prototypes-functions/bear-moods/bearmoodsscreenshot.png)
+![The Great Bear](prototypes-functions/great-bear/thegreatbearscreenshot.png)
+
+Here's the thing nobody tells you about functions: they don't let your program do anything new. They just stop you from writing the same thing fifty times. In Salmon Run, createSalmon() builds a fish and hands it back, and I used it twice: once at the start and again every time a fish got caught. Write the fish once, reuse it forever. That's the whole trick.
+
+Of course, the first time I hit Go Live I got... a blank white screen. No error, nothing. I spent way too long staring at perfectly fine code before realizing Live Server was opening a leftover copy of the template sitting in the wrong folder. Then Windows refused to let me rename "Prototypes-functions" to lowercase because apparently a capital P is a lifelong commitment. If your screen is blank and your code looks right, check which page you're actually looking at.
+
+Bear Says started as four buttons that changed the bear's face. It worked, but it was boring, so I turned it into a Simon Says game where the bear acts out moods and you repeat them back. Small problem: a memory game needs a list that keeps growing, and we haven't learned arrays yet. So I looked them up. I only used the basics, but it felt good to go "I need this" and then figure it out.
+
+The Great Bear was the refactoring one, and it was kind of a mind game. I wrote the first three stars the long, copy-paste way and the file was already 266 lines. After turning it into makeStar(), drawStar() and checkStar(), it only dropped to 233, and I was like... that's it? Then I added the other ten stars and each one was a single line. That's when it clicked. The refactor doesn't pay off right away, it pays off the next time you want more.
+
+The first version was also way too easy, so I made it meaner: trick stars (Alcor sits right next to Mizar like in the real sky, and I misclicked it constantly), a drifting sky, a sunrise timer, and a hint that vanishes after 4 seconds. If I keep going, the Little Bear is next.
