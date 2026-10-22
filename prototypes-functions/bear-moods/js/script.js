@@ -14,21 +14,39 @@
 const bear = {
     mood: "happy"
 };
+
+// The four mood buttons, created in setup()
+let happyButton = undefined;
+let hungryButton = undefined;
+let sleepyButton = undefined;
+let grumpyButton = undefined;
 /**
  * Creates the canvas
  */
+/**
+ * Creates the canvas and the four mood buttons
+ */
 function setup() {
     createCanvas(600, 450);
+
+    happyButton = makeButton(80, "Happy", "happy", "#d9822b");
+    hungryButton = makeButton(227, "Hungry", "hungry", "#b84a3a");
+    sleepyButton = makeButton(373, "Sleepy", "sleepy", "#4f6aa3");
+    grumpyButton = makeButton(520, "Grumpy", "grumpy", "#6b3fa0");
 }
 
 /**
- * Draws the cave scene
+ * Draws the cave, the bear and the buttons
  */
 function draw() {
     drawCave();
     drawBear(width / 2, 150, 130, bear.mood);
-}
 
+    drawButton(happyButton);
+    drawButton(hungryButton);
+    drawButton(sleepyButton);
+    drawButton(grumpyButton);
+}
 /**
  * Draws the whole cave: the rock walls, the floor, the stalactites
  * hanging from the ceiling and the bear's stuff lying around
@@ -65,9 +83,9 @@ function drawCave() {
 
     // The bear's things
     drawHoneyPot(85, 335);
-    drawPawprint(420, 395, -0.3);
-    drawPawprint(455, 375, -0.3);
-    drawPawprint(500, 390, -0.3);
+    drawPawprint(430, 362, -1.2);
+    drawPawprint(470, 345, -1.2);
+    drawPawprint(510, 362, -1.2);
 }
 
 /**
@@ -309,4 +327,79 @@ function drawMoodExtras(x, y, size, mood) {
         line(markX + m * 0.3, markY + m * 0.3, markX + m * 0.3, markY + m);
     }
     pop();
+}
+
+/**
+ * Returns a new mood button at the x position passed in,
+ * with its own label, mood and colour
+ */
+function makeButton(x, label, mood, colour) {
+    const button = {
+        x: x,
+        y: 410,
+        w: 125,
+        h: 50,
+        label: label,
+        mood: mood,
+        colour: colour
+    };
+    return button;
+}
+
+/**
+ * Returns true if the mouse is over the button passed in
+ */
+function isHovered(button) {
+    const insideX = mouseX > button.x - button.w / 2 && mouseX < button.x + button.w / 2;
+    const insideY = mouseY > button.y - button.h / 2 && mouseY < button.y + button.h / 2;
+    return insideX && insideY;
+}
+
+/**
+ * Draws the button passed in, lifting it up when the mouse is over it
+ */
+function drawButton(button) {
+    let lift = 0;
+    if (isHovered(button)) {
+        lift = 4;
+    }
+
+    push();
+    rectMode(CENTER);
+    noStroke();
+
+    // Shadow
+    fill(0, 0, 0, 100);
+    rect(button.x, button.y + 4, button.w, button.h, 12);
+
+    // Button
+    fill(button.colour);
+    rect(button.x, button.y - lift, button.w, button.h, 12);
+
+    // Label
+    fill(255);
+    textSize(20);
+    textStyle(BOLD);
+    textAlign(CENTER, CENTER);
+    text(button.label, button.x, button.y - lift);
+    pop();
+}
+
+/**
+ * Changes the bear's mood to the button's mood if it was clicked
+ */
+function checkButton(button) {
+    if (isHovered(button)) {
+        bear.mood = button.mood;
+    }
+}
+
+/**
+ * Checks every button when the mouse is clicked
+ */
+function mousePressed() {
+    checkButton(happyButton);
+    checkButton(hungryButton);
+    checkButton(sleepyButton);
+    checkButton(grumpyButton);
 }
