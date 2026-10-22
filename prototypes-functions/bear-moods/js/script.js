@@ -1,20 +1,41 @@
 /**
- * Bear Moods
+ * Bear Says
  * Tyler Myrans
  *
- * Keep the bear happy. His hunger, energy and happiness drain over time,
- * and his mood changes depending on how well you take care of him.
+ * A memory game in the Bear Cave. The bear acts out a sequence of moods
+ * (happy, hungry, sleepy, grumpy) and you click the mood buttons back
+ * in the same order. Every round he adds one more mood. Get one wrong
+ * and he gets grumpy.
  *
- * Explores functions with parameters and return values: one function
- * draws the bear in any mood, and one function works out his mood.
+ * Explores functions with parameters and return values: drawBear() draws
+ * him in any mood, makeButton() returns each button, and isCorrect()
+ * returns whether your choice matches the sequence.
+ *
+ * Note: the sequence is stored in an array, which we haven't covered in
+ * class yet. I looked up how arrays work (the p5.js reference and MDN)
+ * because a memory game needs a list that grows each round. I only use
+ * the basics: creating an empty array [], adding to it with push(),
+ * reading an item with [index] and checking its length.
  */
-
 "use strict";
 // The bear and how he is feeling
 const bear = {
     mood: "happy"
 };
-
+// Everything about the Bear Says game
+const game = {
+    // "start", "showing", "playing", "correct" or "over"
+    state: "start",
+    // The list of moods the bear has acted out so far
+    sequence: [],
+    // Which mood in the sequence we are on
+    step: 0,
+    // Counts frames, used to time the bear's moods
+    timer: 0,
+    streak: 0,
+    best: 0,
+    message: "Bear Says! Click any button to start"
+};
 // The four mood buttons, created in setup()
 let happyButton = undefined;
 let hungryButton = undefined;
@@ -33,10 +54,11 @@ function setup() {
     grumpyButton = makeButton(520, "Grumpy", "grumpy", "#6b3fa0");
 }
 
-/**
- * Draws the cave, the bear and the buttons
+ /**
+ * Runs the game, then draws the cave, the bear, the buttons and the message
  */
 function draw() {
+    updateGame();
     drawCave();
     drawBear(width / 2, 150, 130, bear.mood);
 
@@ -44,6 +66,7 @@ function draw() {
     drawButton(hungryButton);
     drawButton(sleepyButton);
     drawButton(grumpyButton);
+    drawGameText();
 }
 /**
  * Draws the whole cave: the rock walls, the floor, the stalactites
@@ -382,16 +405,14 @@ function drawButton(button) {
     text(button.label, button.x, button.y - lift);
     pop();
 }
-
 /**
- * Changes the bear's mood to the button's mood if it was clicked
+ * Sends the button's mood to the game if the button was clicked
  */
 function checkButton(button) {
     if (isHovered(button)) {
-        bear.mood = button.mood;
+        handleChoice(button.mood);
     }
 }
-
 /**
  * Checks every button when the mouse is clicked
  */
@@ -400,4 +421,143 @@ function mousePressed() {
     checkButton(hungryButton);
     checkButton(sleepyButton);
     checkButton(grumpyButton);
+}
+
+/**
+ * Starts a brand new game from a streak of zero
+ */
+function resetGame() {
+    game.sequence = [];
+    game.streak = 0;
+    startRound();
+}
+
+/**
+ * Adds one more mood to the sequence and starts showing it to the player
+ */
+function startRound() {
+    addRandomMood();
+    game.state = "showing";
+    game.step = 0;
+    game.timer = 0;
+    game.message = "Watch the bear...";
+}
+
+/**
+ * Adds a random mood to the end of the sequence
+ */
+function addRandomMood() {
+    const moods = ["happy", "hungry", "sleepy", "grumpy"];
+    const mood = random(moods);
+    game.sequence.push(mood);
+}
+
+/**
+ * Returns true if the mood passed in is the next one in the sequence
+ */
+function isCorrect(mood) {
+    const expected = game.sequence[game.step];
+    return mood === expected;
+}
+
+/**
+ * Runs the timing of the game every frame: the bear acting out
+ * the sequence, and the short pause after a correct round
+ */
+function updateGame() {
+    game.timer += 1;
+
+    if (game.state === "showing") {
+        // Each mood is shown for 50 frames, then a short 15 frame blank
+        if (game.timer < 50) {
+            bear.mood = game.sequence[game.step];
+        }
+        else if (game.timer < 65) {
+            bear.mood = "neutral";
+        }
+        else {
+            game.step += 1;
+            game.timer = 0;
+            // Once the whole sequence has been shown it's the player's turn
+            if (game.step >= game.sequence.length) {
+                game.state = "playing";
+                game.step = 0;
+                game.message = "Your turn!";
+            }
+        }
+    }
+    else if (game.state === "correct") {
+        // Pause so the player can enjoy being right, then go again
+        if (game.timer > 60) {
+            startRound();
+        }
+    }
+    else if (game.state === "playing") {
+        // Go back to a blank face shortly after each click
+        if (game.timer > 25) {
+            bear.mood = "neutral";
+        }
+    }
+}
+
+/**
+ * Handles the player choosing the mood passed in
+ */
+function handleChoice(mood) {
+    // Clicking when the game hasn't started (or is over) starts a new one
+    if (game.state === "start" || game.state === "over") {
+        resetGame();
+        return;
+    }
+
+    // Ignore clicks while the bear is still showing the sequence
+    if (game.state !== "playing") {
+        return;
+    }
+
+    bear.mood = mood;
+    game.timer = 0;
+
+    if (isCorrect(mood)) {
+        game.step += 1;
+        // Got the whole sequence right
+        if (game.step >= game.sequence.length) {
+            game.streak = game.sequence.length;
+            game.best = max(game.best, game.streak);
+            game.state = "correct";
+            game.message = "Nice! " + game.streak + " in a row";
+            bear.mood = "happy";
+        }
+    }
+    else {
+        game.state = "over";
+        game.message = "Wrong! Click any button to try again";
+        bear.mood = "grumpy";
+    }
+}
+
+/**
+ * Draws the game message and the streak at the top of the cave
+ */
+function drawGameText() {
+    push();
+    rectMode(CENTER);
+    noStroke();
+
+    // Dark banner behind the message so it's easy to read
+    fill(0, 0, 0, 150);
+    rect(width / 2, 32, 420, 44, 22);
+
+    fill(255);
+    textAlign(CENTER, CENTER);
+    textStyle(BOLD);
+    textSize(22);
+    text(game.message, width / 2, 32);
+
+    // Streak and best score under the banner
+    textStyle(NORMAL);
+    textSize(15);
+    fill(255, 230, 180);
+    text("Streak: " + game.streak + "   Best: " + game.best, width / 2, 68);
+    pop();
 }
