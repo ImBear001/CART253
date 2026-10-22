@@ -15,19 +15,202 @@
 
 "use strict";
 
+// The first three stars of the Great Bear's tail
+let alkaid = undefined;
+let mizar = undefined;
+let alioth = undefined;
+
+// Which star the player needs to click next (1 is the first star)
+let nextStar = 1;
+
 /**
- * Creates the canvas
+ * Creates the canvas and the stars
  */
 function setup() {
     createCanvas(600, 450);
+
+    alkaid = {
+        x: 70,
+        y: 175,
+        name: "Alkaid",
+        order: 1,
+        size: random(9, 13),
+        twinkleSpeed: random(0.04, 0.08),
+        twinkleOffset: random(0, 100)
+    };
+    mizar = {
+        x: 135,
+        y: 140,
+        name: "Mizar",
+        order: 2,
+        size: random(9, 13),
+        twinkleSpeed: random(0.04, 0.08),
+        twinkleOffset: random(0, 100)
+    };
+    alioth = {
+        x: 195,
+        y: 135,
+        name: "Alioth",
+        order: 3,
+        size: random(9, 13),
+        twinkleSpeed: random(0.04, 0.08),
+        twinkleOffset: random(0, 100)
+    };
 }
 
 /**
- * Draws the night sky and the little bear on his hill
+ * Draws the sky, the stars, the lines between them and the little bear
  */
 function draw() {
     drawSky();
+
+    // Lines between the stars that have been connected
+    if (mizar.order < nextStar) {
+        push();
+        stroke(255, 215, 120, 70);
+        strokeWeight(8);
+        line(alkaid.x, alkaid.y, mizar.x, mizar.y);
+        stroke(255, 225, 150);
+        strokeWeight(2);
+        line(alkaid.x, alkaid.y, mizar.x, mizar.y);
+        pop();
+    }
+    if (alioth.order < nextStar) {
+        push();
+        stroke(255, 215, 120, 70);
+        strokeWeight(8);
+        line(mizar.x, mizar.y, alioth.x, alioth.y);
+        stroke(255, 225, 150);
+        strokeWeight(2);
+        line(mizar.x, mizar.y, alioth.x, alioth.y);
+        pop();
+    }
+
+    // Alkaid
+    push();
+    noStroke();
+    const alkaidSize = alkaid.size + sin(frameCount * alkaid.twinkleSpeed + alkaid.twinkleOffset) * 2;
+    let alkaidGlow = alkaidSize * 2.5;
+    if (dist(mouseX, mouseY, alkaid.x, alkaid.y) < 13) {
+        alkaidGlow = alkaidSize * 4;
+    }
+    fill(200, 220, 255, 50);
+    ellipse(alkaid.x, alkaid.y, alkaidGlow);
+    if (alkaid.order < nextStar) {
+        fill(255, 215, 120);
+    }
+    else {
+        fill(240, 245, 255);
+    }
+    ellipse(alkaid.x, alkaid.y, alkaidSize);
+    stroke(255, 255, 255, 180);
+    strokeWeight(1.5);
+    line(alkaid.x - alkaidSize, alkaid.y, alkaid.x + alkaidSize, alkaid.y);
+    line(alkaid.x, alkaid.y - alkaidSize, alkaid.x, alkaid.y + alkaidSize);
+    if (dist(mouseX, mouseY, alkaid.x, alkaid.y) < 13) {
+        noStroke();
+        fill(220, 230, 255);
+        textSize(14);
+        textAlign(CENTER, BOTTOM);
+        text(alkaid.name, alkaid.x, alkaid.y - 16);
+    }
+    pop();
+
+    // Mizar
+    push();
+    noStroke();
+    const mizarSize = mizar.size + sin(frameCount * mizar.twinkleSpeed + mizar.twinkleOffset) * 2;
+    let mizarGlow = mizarSize * 2.5;
+    if (dist(mouseX, mouseY, mizar.x, mizar.y) < 13) {
+        mizarGlow = mizarSize * 4;
+    }
+    fill(200, 220, 255, 50);
+    ellipse(mizar.x, mizar.y, mizarGlow);
+    if (mizar.order < nextStar) {
+        fill(255, 215, 120);
+    }
+    else {
+        fill(240, 245, 255);
+    }
+    ellipse(mizar.x, mizar.y, mizarSize);
+    stroke(255, 255, 255, 180);
+    strokeWeight(1.5);
+    line(mizar.x - mizarSize, mizar.y, mizar.x + mizarSize, mizar.y);
+    line(mizar.x, mizar.y - mizarSize, mizar.x, mizar.y + mizarSize);
+    if (dist(mouseX, mouseY, mizar.x, mizar.y) < 13) {
+        noStroke();
+        fill(220, 230, 255);
+        textSize(14);
+        textAlign(CENTER, BOTTOM);
+        text(mizar.name, mizar.x, mizar.y - 16);
+    }
+    pop();
+
+    // Alioth
+    push();
+    noStroke();
+    const aliothSize = alioth.size + sin(frameCount * alioth.twinkleSpeed + alioth.twinkleOffset) * 2;
+    let aliothGlow = aliothSize * 2.5;
+    if (dist(mouseX, mouseY, alioth.x, alioth.y) < 13) {
+        aliothGlow = aliothSize * 4;
+    }
+    fill(200, 220, 255, 50);
+    ellipse(alioth.x, alioth.y, aliothGlow);
+    if (alioth.order < nextStar) {
+        fill(255, 215, 120);
+    }
+    else {
+        fill(240, 245, 255);
+    }
+    ellipse(alioth.x, alioth.y, aliothSize);
+    stroke(255, 255, 255, 180);
+    strokeWeight(1.5);
+    line(alioth.x - aliothSize, alioth.y, alioth.x + aliothSize, alioth.y);
+    line(alioth.x, alioth.y - aliothSize, alioth.x, alioth.y + aliothSize);
+    if (dist(mouseX, mouseY, alioth.x, alioth.y) < 13) {
+        noStroke();
+        fill(220, 230, 255);
+        textSize(14);
+        textAlign(CENTER, BOTTOM);
+        text(alioth.name, alioth.x, alioth.y - 16);
+    }
+    pop();
+
     drawHill();
+}
+
+/**
+ * Checks each star when the mouse is clicked. The right star connects,
+ * any other star resets the lines.
+ */
+function mousePressed() {
+    // Alkaid
+    if (dist(mouseX, mouseY, alkaid.x, alkaid.y) < 13 && alkaid.order >= nextStar) {
+        if (alkaid.order === nextStar) {
+            nextStar += 1;
+        }
+        else {
+            nextStar = 1;
+        }
+    }
+    // Mizar
+    if (dist(mouseX, mouseY, mizar.x, mizar.y) < 13 && mizar.order >= nextStar) {
+        if (mizar.order === nextStar) {
+            nextStar += 1;
+        }
+        else {
+            nextStar = 1;
+        }
+    }
+    // Alioth
+    if (dist(mouseX, mouseY, alioth.x, alioth.y) < 13 && alioth.order >= nextStar) {
+        if (alioth.order === nextStar) {
+            nextStar += 1;
+        }
+        else {
+            nextStar = 1;
+        }
+    }
 }
 
 /**
