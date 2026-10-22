@@ -51,6 +51,12 @@ let skyAngle = 0;
 // Counts down after a wrong click so the sky can flash red
 let wrongTimer = 0;
 
+// Counts up after the constellation is finished, to fade in the Great Bear
+let revealTimer = 0;
+
+// A shooting star that streaks across the sky every so often
+let shootingStar = undefined;
+
 /**
  * Creates the canvas and all the stars
  */
@@ -73,6 +79,8 @@ function setup() {
     muscida = makeStar(440, 100, "Muscida", 0);
     talitha = makeStar(425, 262, "Talitha", 0);
     polaris = makeStar(318, 95, "Polaris", 0);
+
+    shootingStar = makeShootingStar();
 }
 
 /**
@@ -82,6 +90,13 @@ function draw() {
     updateNight();
 
     drawSky();
+    drawShootingStar(shootingStar);
+
+    // The Great Bear fades in behind the stars once they're all connected
+    if (isComplete()) {
+        revealTimer += 1;
+        drawGreatBear(revealTimer);
+    }
 
     // Move every star with the drifting sky
     updateStar(alkaid);
@@ -353,6 +368,7 @@ function keyPressed() {
         nextStar = 1;
         nightTimer = nightLength;
         nightClock = 0;
+        revealTimer = 0;
     }
 }
 
@@ -482,5 +498,91 @@ function drawMessage() {
         const secondsLeft = ceil(nightTimer / 60);
         text("Find the Great Bear (" + (nextStar - 1) + "/7)      Sunrise in " + secondsLeft + "s", width / 2, 30);
     }
+    pop();
+}
+
+/**
+ * Returns a new shooting star starting somewhere along the top of the sky
+ */
+function makeShootingStar() {
+    const shooting = {
+        x: random(100, width + 100),
+        y: random(-40, 60),
+        speed: random(8, 12),
+        // How many frames to wait before it appears
+        wait: random(60, 240)
+    };
+    return shooting;
+}
+
+/**
+ * Moves and draws the shooting star passed in, and sends out
+ * a new one once it has left the sky
+ */
+function drawShootingStar(shooting) {
+    if (shooting.wait > 0) {
+        shooting.wait -= 1;
+        return;
+    }
+
+    shooting.x -= shooting.speed;
+    shooting.y += shooting.speed * 0.5;
+
+    push();
+    stroke(255, 255, 255, 180);
+    strokeWeight(2);
+    line(shooting.x, shooting.y, shooting.x + 60, shooting.y - 30);
+    noStroke();
+    fill(255);
+    ellipse(shooting.x, shooting.y, 4);
+    pop();
+
+    if (shooting.x < -80 || shooting.y > height) {
+        shootingStar = makeShootingStar();
+    }
+}
+
+/**
+ * Draws the ghostly Great Bear across the sky, fading in over time.
+ * The handle of the dipper is his tail and the bowl is his back.
+ */
+function drawGreatBear(timer) {
+    const fade = constrain(timer * 2, 0, 100);
+    // He slowly breathes, like the bear in the cave
+    const breath = sin(frameCount * 0.03) * 4;
+
+    push();
+    // The Great Bear drifts with the rest of the sky
+    translate(width / 2, -300);
+    rotate(skyAngle);
+    translate(-width / 2, 300);
+
+    rectMode(CENTER);
+    fill(120, 160, 255, fade * 0.45);
+    stroke(170, 200, 255, fade * 1.6);
+    strokeWeight(2);
+
+    // Legs (drawn first so the body covers their tops)
+    rect(285, 290, 34, 70, 14);
+    rect(330, 295, 34, 70, 14);
+    rect(425, 295, 34, 70, 14);
+    rect(465, 288, 34, 66, 14);
+
+    // Body
+    ellipse(375, 215, 250 + breath, 140 + breath);
+
+    // Ears
+    ellipse(487, 122, 30);
+    ellipse(525, 120, 30);
+
+    // Head and snout
+    ellipse(508, 160, 92, 78);
+    ellipse(552, 172, 50, 32);
+
+    // Eye and nose
+    noStroke();
+    fill(220, 235, 255, fade * 2.5);
+    ellipse(518, 150, 8);
+    ellipse(574, 168, 9, 7);
     pop();
 }
