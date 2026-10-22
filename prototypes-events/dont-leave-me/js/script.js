@@ -18,7 +18,7 @@
 // The canvas, kept so we can listen for the mouse entering and leaving it
 let canvas = undefined;
 
-// How the bear feels: "happy", "worried" or "petted"
+// How the bear feels: "happy", "worried", "crying", "squished" or "petted"
 let mood = "happy";
 
 // How many frames the mouse has been away from the canvas
@@ -27,7 +27,13 @@ let awayFrames = 0;
 // Is the mouse over the canvas right now?
 let mouseIsHere = true;
 
-// Counts down while the bear is being petted
+// When the player switched to another tab (in milliseconds)
+let leftAt = 0;
+
+// How many seconds the player was gone the last time they switched tabs
+let secondsGone = 0;
+
+// Counts down while the bear is crying, squished or being petted
 let moodTimer = 0;
 
 // Where the bear is looking (follows the mouse)
@@ -36,12 +42,15 @@ let lookY = 0;
 
 /**
  * Creates the canvas and starts listening for the mouse
- * entering and leaving it
+ * leaving the canvas and the player switching tabs
  */
 function setup() {
     canvas = createCanvas(600, 450);
     canvas.mouseOver(mouseEntered);
     canvas.mouseOut(mouseLeft);
+
+    // A browser event (not from p5) for when the tab is hidden or shown
+    document.addEventListener("visibilitychange", tabChanged);
 }
 
 /**
@@ -59,7 +68,7 @@ function draw() {
  * Works out the bear's mood from where the mouse is and what just happened
  */
 function updateMood() {
-    // Being petted lasts for a little while
+    // Crying, squished and petted last for a little while
     if (moodTimer > 0) {
         moodTimer -= 1;
         return;
@@ -108,6 +117,30 @@ function mouseLeft() {
 }
 
 /**
+ * Called when the browser window changes size: the bear gets squished
+ */
+function windowResized() {
+    mood = "squished";
+    moodTimer = 60 * 2;
+}
+
+/**
+ * Called when the player switches away from this tab or comes back to it
+ */
+function tabChanged() {
+    if (document.hidden) {
+        // The player just left, remember when
+        leftAt = millis();
+    }
+    else {
+        // The player is back: work out how long they were gone
+        secondsGone = round((millis() - leftAt) / 1000);
+        mood = "crying";
+        moodTimer = 60 * 5;
+    }
+}
+
+/**
  * Draws the bear's room, which gets darker the longer you're away
  */
 function drawRoom() {
@@ -130,6 +163,10 @@ function drawBear(x, y, size) {
     push();
     translate(x, y);
 
+    // Squished: flat and wide
+    if (mood === "squished") {
+        scale(1.4, 0.6);
+    }
     // Worried: he shakes more the longer you're gone
     if (mood === "worried") {
         const shake = constrain(awayFrames / 60, 0, 5);
@@ -146,7 +183,7 @@ function drawBear(x, y, size) {
     fill(92, 58, 33);
     ellipse(0, size * 0.95, size * 1.2, size * 0.9);
     // Arms reach out towards you when he's worried
-    if (mood === "worried") {
+    if (mood === "worried" || mood === "crying") {
         ellipse(-size * 0.7, size * 0.6, size * 0.45, size * 0.22);
         ellipse(size * 0.7, size * 0.6, size * 0.45, size * 0.22);
     }
@@ -200,8 +237,8 @@ function drawEyes(size) {
         ellipse(eyeX + pupilX, eyeY + pupilY, size * 0.07);
     }
 
-    // Tears when he's been worried for a while
-    if (mood === "worried" && awayFrames > 90) {
+    // Tears when he's crying, or when he's been worried for a while
+    if (mood === "crying" || (mood === "worried" && awayFrames > 90)) {
         fill(150, 200, 255);
         const drip = (frameCount % 30) / 30 * size * 0.3;
         ellipse(-eyeX, eyeY + size * 0.1 + drip, size * 0.05, size * 0.07);
@@ -227,6 +264,12 @@ function drawMouth(size) {
         ellipse(-size * 0.3, size * 0.08, size * 0.14, size * 0.08);
         ellipse(size * 0.3, size * 0.08, size * 0.14, size * 0.08);
     }
+    else if (mood === "squished") {
+        // Squiggly mouth
+        line(-size * 0.07, size * 0.27, -size * 0.02, size * 0.24);
+        line(-size * 0.02, size * 0.24, size * 0.02, size * 0.27);
+        line(size * 0.02, size * 0.27, size * 0.07, size * 0.24);
+    }
     else {
         // Wobbly upset mouth
         arc(0, size * 0.3, size * 0.16, size * 0.08, PI, TWO_PI);
@@ -242,6 +285,12 @@ function drawMessage() {
 
     if (mood === "petted") {
         message = "Hehe. More pets please.";
+    }
+    else if (mood === "squished") {
+        message = "HEY! Stop squishing me!";
+    }
+    else if (mood === "crying") {
+        message = "You were gone for " + secondsGone + " seconds!! Where did you go?!";
     }
     else if (mood === "worried") {
         if (awayFrames < 60 * 2) {
@@ -268,6 +317,6 @@ function drawMessage() {
     // A hint for the player at the bottom
     fill(0, 0, 0, 120);
     textSize(13);
-    text("Click him to pet him. Try moving your mouse away from him.", width / 2, 430);
+    text("Click him to pet him. Try moving your mouse away, switching tabs or resizing the window.", width / 2, 430);
     pop();
 }
