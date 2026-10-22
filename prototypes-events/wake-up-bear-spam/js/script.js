@@ -22,8 +22,17 @@ const pressStrength = 6;
 // How fast he falls back asleep every frame
 const sleepSpeed = 0.6;
 
+// Counts down after each press so the bear shakes for a moment
+let shake = 0;
+
 // Counts how many keys have been pressed
 let presses = 0;
+
+// "sleeping" until he wakes up, then "awake"
+let state = "sleeping";
+
+// Counts frames once he's awake, for the roar
+let awakeTimer = 0;
 
 /**
  * Creates the canvas
@@ -36,11 +45,23 @@ function setup() {
  * Lets the bear drift back to sleep, then draws the cave, the bear and the meter
  */
 function draw() {
-    // Time passing pulls him back to sleep
-    awake = max(awake - sleepSpeed, 0);
+    if (state === "sleeping") {
+        // Time passing pulls him back to sleep
+        awake = max(awake - sleepSpeed, 0);
+    }
+    else {
+        awakeTimer += 1;
+    }
 
+    push();
+    // Shake the whole scene for a moment after each press
+    if (shake > 0) {
+        translate(random(-shake, shake), random(-shake, shake));
+        shake -= 1;
+    }
     drawCave();
     drawBear();
+    pop();
 
     drawMeter();
     drawMessage();
@@ -50,8 +71,25 @@ function draw() {
  * Every time any key is pressed, the bear wakes up a little more
  */
 function keyPressed() {
+    if (state === "awake") {
+        // Once he's up, R puts him back to bed
+        if (key === "r" || key === "R") {
+            state = "sleeping";
+            awake = 0;
+            presses = 0;
+            awakeTimer = 0;
+        }
+        return;
+    }
+
     awake = min(awake + pressStrength, 100);
     presses += 1;
+    shake = 6;
+
+    if (awake >= 100) {
+        state = "awake";
+        shake = 25;
+    }
 }
 
 /**
@@ -71,7 +109,8 @@ function drawCave() {
 }
 
 /**
- * Draws the bear curled up asleep, breathing faster as he wakes up
+ * Draws the bear curled up asleep, groggy, or standing up roaring,
+ * depending on how awake he is
  */
 function drawBear() {
     const x = width / 2;
@@ -82,12 +121,22 @@ function drawBear() {
     push();
     noStroke();
 
-    // Curled up in a ball on the floor
-    fill(92, 58, 33);
-    ellipse(x, 300 + breath * 0.5, 300 + breath, 140 + breath);
-    drawHead(x - 110, 290, 110);
-    if (awake < 40) {
-        drawZzz(x - 60, 230);
+    if (state === "awake") {
+        // Standing up, big and angry
+        fill(92, 58, 33);
+        ellipse(x, 290, 230, 200);
+        fill(150, 105, 70);
+        ellipse(x, 305, 120, 120);
+        drawHead(x, 175, 150);
+    }
+    else {
+        // Curled up in a ball on the floor
+        fill(92, 58, 33);
+        ellipse(x, 300 + breath * 0.5, 300 + breath, 140 + breath);
+        drawHead(x - 110, 290, 110);
+        if (awake < 40) {
+            drawZzz(x - 60, 230);
+        }
     }
     pop();
 }
@@ -123,8 +172,22 @@ function drawHead(x, y, size) {
     ellipse(x - size * 0.19, y - size * 0.08, size * 0.1, max(eyeOpen, 1));
     ellipse(x + size * 0.19, y - size * 0.08, size * 0.1, max(eyeOpen, 1));
 
-    // Sleepy flat mouth
-    line(x - size * 0.05, y + size * 0.26, x + size * 0.05, y + size * 0.26);
+    if (state === "awake") {
+        // Angry eyebrows and a huge roaring mouth
+        line(x - size * 0.27, y - size * 0.2, x - size * 0.1, y - size * 0.13);
+        line(x + size * 0.27, y - size * 0.2, x + size * 0.1, y - size * 0.13);
+        noStroke();
+        fill(120, 30, 30);
+        const roar = size * 0.2 + sin(awakeTimer * 0.3) * size * 0.03;
+        ellipse(x, y + size * 0.3, size * 0.25, roar);
+        fill(255);
+        triangle(x - size * 0.08, y + size * 0.22, x - size * 0.04, y + size * 0.22, x - size * 0.06, y + size * 0.28);
+        triangle(x + size * 0.08, y + size * 0.22, x + size * 0.04, y + size * 0.22, x + size * 0.06, y + size * 0.28);
+    }
+    else {
+        // Sleepy flat mouth
+        line(x - size * 0.05, y + size * 0.26, x + size * 0.05, y + size * 0.26);
+    }
     pop();
 }
 
@@ -166,7 +229,7 @@ function drawMeter() {
 }
 
 /**
- * Draws the instructions, changing as he wakes up
+ * Draws the instructions, or the bear's reaction once he's awake
  */
 function drawMessage() {
     push();
@@ -174,7 +237,15 @@ function drawMessage() {
     textAlign(CENTER, CENTER);
     fill(255);
 
-    if (awake === 0) {
+    if (state === "awake") {
+        textSize(36);
+        textStyle(BOLD);
+        text("WHO WOKE ME UP?!", width / 2, 40);
+        textStyle(NORMAL);
+        textSize(15);
+        text("It took " + presses + " presses.   Press R to put him back to bed", width / 2, 78);
+    }
+    else if (awake === 0) {
         textSize(20);
         text("He's hibernating. Mash any key to wake him up.", width / 2, 40);
     }
