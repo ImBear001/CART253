@@ -15,7 +15,7 @@
 
 "use strict";
 
-// // The seven stars of the Big Dipper, the brightest part of the Great Bear
+// The seven stars of the Big Dipper, the brightest part of the Great Bear
 let alkaid = undefined;
 let mizar = undefined;
 let alioth = undefined;
@@ -35,8 +35,24 @@ let polaris = undefined;
 // Which star the player needs to click next (1 is the first star)
 let nextStar = 1;
 
+// How many frames are left until sunrise (60 frames is one second)
+const nightLength = 60 * 45;
+let nightTimer = nightLength;
+
+// How many frames the shape of the Great Bear is shown at the start
+const hintLength = 60 * 4;
+
+// How many frames since this night started
+let nightClock = 0;
+
+// How far the sky has drifted this frame
+let skyAngle = 0;
+
+// Counts down after a wrong click so the sky can flash red
+let wrongTimer = 0;
+
 /**
- * Creates the canvas and the stars
+ * Creates the canvas and all the stars
  */
 function setup() {
     createCanvas(600, 450);
@@ -60,10 +76,30 @@ function setup() {
 }
 
 /**
- * Draws the sky, the stars, the lines between them and the little bear
+ * Runs the night: moves the sky, draws everything and checks for sunrise
  */
 function draw() {
+    updateNight();
+
     drawSky();
+
+    // Move every star with the drifting sky
+    updateStar(alkaid);
+    updateStar(mizar);
+    updateStar(alioth);
+    updateStar(megrez);
+    updateStar(phecda);
+    updateStar(merak);
+    updateStar(dubhe);
+    updateStar(alcor);
+    updateStar(thuban);
+    updateStar(corCaroli);
+    updateStar(muscida);
+    updateStar(talitha);
+    updateStar(polaris);
+
+    // At the start, show the shape of the Great Bear for a few seconds
+    drawHint();
 
     // A line between each pair of stars that has been connected
     connectStars(alkaid, mizar);
@@ -77,6 +113,7 @@ function draw() {
 
     drawStar(alkaid);
     drawStar(mizar);
+    drawStar(alioth);
     drawStar(megrez);
     drawStar(phecda);
     drawStar(merak);
@@ -87,15 +124,49 @@ function draw() {
     drawStar(muscida);
     drawStar(talitha);
     drawStar(polaris);
+
+    // The sun rises from behind the hill
+    drawSun();
     drawHill();
+    drawWrongFlash();
+    drawMessage();
+}
+
+/**
+ * Counts down to sunrise and slowly drifts the sky back and forth
+ */
+function updateNight() {
+    nightClock += 1;
+    if (!isComplete() && nightTimer > 0) {
+        nightTimer -= 1;
+    }
+    skyAngle = sin(frameCount * 0.006) * 0.12;
+}
+
+/**
+ * Returns how close it is to sunrise, from 0 (middle of the night) to 1 (sunrise)
+ */
+function dawnAmount() {
+    return 1 - nightTimer / nightLength;
+}
+
+/**
+ * Returns true if the sun has come up before the Great Bear was found
+ */
+function isSunrise() {
+    return nightTimer <= 0 && !isComplete();
 }
 
 /**
  * Returns a new star at the position passed in, with its real name
- * and its place in the order the player has to click it
+ * and its place in the order the player has to click it (0 for trick stars)
  */
 function makeStar(x, y, name, order) {
     const star = {
+        // Where the star sits before the sky drifts
+        baseX: x,
+        baseY: y,
+        // Where the star is right now
         x: x,
         y: y,
         name: name,
@@ -109,6 +180,19 @@ function makeStar(x, y, name, order) {
 }
 
 /**
+ * Moves the star passed in to where it is in the drifting sky,
+ * by turning it around a point high above the canvas
+ */
+function updateStar(star) {
+    const centreX = width / 2;
+    const centreY = -300;
+    const dx = star.baseX - centreX;
+    const dy = star.baseY - centreY;
+    star.x = centreX + dx * cos(skyAngle) - dy * sin(skyAngle);
+    star.y = centreY + dx * sin(skyAngle) + dy * cos(skyAngle);
+}
+
+/**
  * Returns true if the mouse is close enough to the star passed in
  */
 function isHovered(star) {
@@ -117,19 +201,29 @@ function isHovered(star) {
 }
 
 /**
- * Returns true if the star passed in has already been clicked
+ * Returns true if the star passed in is part of the Great Bear
+ * and has already been clicked
  */
 function isConnected(star) {
     return star.order > 0 && star.order < nextStar;
 }
 
 /**
+ * Returns true once all seven stars have been connected
+ */
+function isComplete() {
+    return nextStar > 7;
+}
+
+/**
  * Draws the star passed in: twinkling, glowing when hovered,
- * gold when connected, with its name when the mouse is over it
+ * gold when connected, with its name when the mouse is over it.
+ * Stars fade as the sun comes up.
  */
 function drawStar(star) {
     const twinkle = sin(frameCount * star.twinkleSpeed + star.twinkleOffset);
     const size = star.size + twinkle * 2;
+    const fade = map(dawnAmount(), 0.6, 1, 255, 60, true);
 
     push();
     noStroke();
@@ -139,20 +233,20 @@ function drawStar(star) {
     if (isHovered(star)) {
         glowSize = size * 4;
     }
-    fill(200, 220, 255, 50);
+    fill(200, 220, 255, fade * 0.2);
     ellipse(star.x, star.y, glowSize);
 
     // The star itself, gold once it's connected
     if (isConnected(star)) {
-        fill(255, 215, 120);
+        fill(255, 215, 120, fade);
     }
     else {
-        fill(240, 245, 255);
+        fill(240, 245, 255, fade);
     }
     ellipse(star.x, star.y, size);
 
     // A little four-pointed sparkle
-    stroke(255, 255, 255, 180);
+    stroke(255, 255, 255, fade * 0.7);
     strokeWeight(1.5);
     line(star.x - size, star.y, star.x + size, star.y);
     line(star.x, star.y - size, star.x, star.y + size);
@@ -193,6 +287,24 @@ function drawLine(starA, starB, alpha) {
 }
 
 /**
+ * For the first few seconds, shows the shape of the Great Bear,
+ * fading out so the player has to remember it
+ */
+function drawHint() {
+    if (nightClock > hintLength) {
+        return;
+    }
+    const alpha = map(nightClock, hintLength * 0.5, hintLength, 160, 0, true);
+    drawLine(alkaid, mizar, alpha);
+    drawLine(mizar, alioth, alpha);
+    drawLine(alioth, megrez, alpha);
+    drawLine(megrez, phecda, alpha);
+    drawLine(phecda, merak, alpha);
+    drawLine(merak, dubhe, alpha);
+    drawLine(dubhe, megrez, alpha);
+}
+
+/**
  * Checks if the star passed in was clicked, and whether it was the right one
  */
 function checkStar(star) {
@@ -204,8 +316,10 @@ function checkStar(star) {
         nextStar += 1;
     }
     else {
-        // Wrong star: the lines fade and you start again
+        // Wrong star: the lines fade, you start again and lose 3 seconds
         nextStar = 1;
+        wrongTimer = 30;
+        nightTimer = max(nightTimer - 60 * 3, 0);
     }
 }
 
@@ -213,10 +327,13 @@ function checkStar(star) {
  * Checks every star when the mouse is clicked
  */
 function mousePressed() {
+    if (isComplete() || isSunrise()) {
+        return;
+    }
     checkStar(alkaid);
     checkStar(mizar);
     checkStar(alioth);
-        checkStar(megrez);
+    checkStar(megrez);
     checkStar(phecda);
     checkStar(merak);
     checkStar(dubhe);
@@ -229,10 +346,24 @@ function mousePressed() {
 }
 
 /**
- * Draws the night sky with lots of small twinkling background stars
+ * Starts a new night when R is pressed
+ */
+function keyPressed() {
+    if (key === "r" || key === "R") {
+        nextStar = 1;
+        nightTimer = nightLength;
+        nightClock = 0;
+    }
+}
+
+/**
+ * Draws the night sky, getting lighter as sunrise gets closer,
+ * with lots of small twinkling background stars
  */
 function drawSky() {
-    background("#0b1026");
+    const night = color("#0b1026");
+    const dawn = color("#e58a5c");
+    background(lerpColor(night, dawn, map(dawnAmount(), 0.5, 1, 0, 1, true)));
 
     // A lighter band near the horizon
     push();
@@ -243,13 +374,14 @@ function drawSky() {
 
     // Background stars. Using the same random seed every frame keeps them
     // in the same places, and noise() makes each one twinkle on its own.
+    const fade = map(dawnAmount(), 0.5, 1, 1, 0, true);
     push();
     randomSeed(253);
     noStroke();
     for (let i = 0; i < 140; i++) {
         const x = random(width);
         const y = random(height - 80);
-        const brightness = noise(i, frameCount * 0.02) * 255;
+        const brightness = noise(i, frameCount * 0.02) * 255 * fade;
         fill(255, 255, 255, brightness);
         ellipse(x, y, random(1, 2.5));
     }
@@ -277,5 +409,78 @@ function drawHill() {
     ellipse(120, 352, 36, 34);
     ellipse(106, 338, 13);
     ellipse(134, 338, 13);
+    pop();
+}
+
+/**
+ * Draws the sun peeking over the hill once it's sunrise
+ */
+function drawSun() {
+    if (!isSunrise()) {
+        return;
+    }
+    push();
+    noStroke();
+    fill(255, 200, 90, 90);
+    ellipse(470, height - 60, 200);
+    fill(255, 210, 110);
+    ellipse(470, height - 60, 120);
+    pop();
+}
+
+/**
+ * Tints the sky red for a moment after a wrong star is clicked
+ */
+function drawWrongFlash() {
+    if (wrongTimer > 0) {
+        push();
+        noStroke();
+        fill(200, 40, 40, wrongTimer * 3);
+        rect(0, 0, width, height);
+        pop();
+        wrongTimer -= 1;
+    }
+}
+
+/**
+ * Draws the instructions and time left, or the ending message
+ */
+function drawMessage() {
+    push();
+    noStroke();
+    textAlign(CENTER, CENTER);
+
+    if (isComplete()) {
+        fill(255, 225, 150);
+        textSize(30);
+        textStyle(BOLD);
+        text("Ursa Major", width / 2, 40);
+        textStyle(NORMAL);
+        textSize(15);
+        fill(200, 215, 255);
+        const secondsLeft = ceil(nightTimer / 60);
+        text("You found the Great Bear with " + secondsLeft + "s to spare.   Press R to play again", width / 2, 72);
+    }
+    else if (isSunrise()) {
+        fill(60, 25, 20);
+        textSize(26);
+        textStyle(BOLD);
+        text("The sun came up", width / 2, 40);
+        textStyle(NORMAL);
+        textSize(15);
+        text("The Great Bear is hiding until tomorrow night.   Press R to try again", width / 2, 72);
+    }
+    else if (nightClock < hintLength) {
+        fill(255, 225, 150);
+        textSize(18);
+        textStyle(BOLD);
+        text("Remember the shape...", width / 2, 30);
+    }
+    else {
+        fill(200, 215, 255);
+        textSize(16);
+        const secondsLeft = ceil(nightTimer / 60);
+        text("Find the Great Bear (" + (nextStar - 1) + "/7)      Sunrise in " + secondsLeft + "s", width / 2, 30);
+    }
     pop();
 }
