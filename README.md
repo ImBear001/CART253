@@ -94,3 +94,34 @@ Sneak in, grab the sleeping bear's honey, and bring it back to the start circle.
 
 ### Journal
 - [Journal entry: Prototyping Conditionals](journal.md#prototyping-conditionals)
+
+## Prototyping: Functions
+
+Three Bear Cave prototypes exploring functions: parameters, return values and refactoring repeated code.
+
+### Salmon Run
+![Salmon Run](Prototypes-functions/salmon-run/salmonrunscreenshot.png)
+
+Salmon leap out of the river and the bear is hungry. Click a salmon to catch it and he smiles, a splash bursts out, and he gets a little chubbier with every fish. `createSalmon()` returns a brand new fish every time one is caught or splashes back down.
+
+- [Run it](https://imbear001.github.io/CART253/Prototypes-functions/salmon-run/)
+- [Code](https://github.com/ImBear001/CART253/tree/main/Prototypes-functions/salmon-run)
+
+### Bear Says
+![Bear Says](prototypes-functions/bear-moods/bearmoodsscreenshot.png)
+
+A Simon Says memory game. The bear acts out a sequence of moods (happy, hungry, sleepy, grumpy) and you click them back in the same order. Every round he adds one more. Get one wrong and he gets grumpy. One `drawBear()` function draws him in any mood, and `makeButton()` returns each button.
+
+- [Run it](https://imbear001.github.io/CART253/prototypes-functions/bear-moods/)
+- [Code](https://github.com/ImBear001/CART253/tree/main/prototypes-functions/bear-moods)
+
+### The Great Bear
+![The Great Bear](prototypes-functions/great-bear/thegreatbearscreenshot.png)
+
+A little bear looks up at the night sky. Find Ursa Major by clicking its seven stars in order before sunrise. The shape only shows for a few seconds, trick stars are mixed in, the sky drifts, and wrong clicks cost you time. Finish it and the Great Bear appears across the sky. This one was a refactoring exercise: I wrote the first stars the long copy-paste way, then replaced it with `makeStar()`, `drawStar()` and `checkStar()`, which made adding ten more stars take one line each.
+
+- [Run it](https://imbear001.github.io/CART253/prototypes-functions/great-bear/)
+- [Code](https://github.com/ImBear001/CART253/tree/main/prototypes-functions/great-bear)
+
+### Journal
+- [Journal entry: Prototyping Functions](journal.md#prototyping-functions)
