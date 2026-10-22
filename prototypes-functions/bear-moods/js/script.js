@@ -23,6 +23,7 @@ function setup() {
  */
 function draw() {
     drawCave();
+    drawBear(width / 2, 150, 130);
 }
 
 /**
@@ -127,5 +128,61 @@ function drawPawprint(x, y, angle) {
     ellipse(-4, -17, 7, 8);
     ellipse(4, -17, 7, 8);
     ellipse(11, -13, 7, 8);
+    pop();
+}
+
+/**
+ * Draws the bear sitting in the cave at the position and size passed in.
+ * He slowly breathes in and out so he looks alive.
+ */
+function drawBear(x, y, size) {
+    // Breathing: the bear grows and shrinks a tiny bit over time
+    const breath = sin(frameCount * 0.05) * size * 0.02;
+    const bodySize = size * 1.3 + breath;
+
+    push();
+    noStroke();
+
+    // Body
+    fill(92, 58, 33);
+    ellipse(x, y + size * 0.85, bodySize, bodySize * 0.9);
+
+    // Belly
+    fill(150, 105, 70);
+    ellipse(x, y + size * 0.95, bodySize * 0.55, bodySize * 0.55);
+
+    // Paws resting on the floor
+    fill(80, 50, 28);
+    ellipse(x - size * 0.4, y + size * 1.3, size * 0.35, size * 0.22);
+    ellipse(x + size * 0.4, y + size * 1.3, size * 0.35, size * 0.22);
+
+    // Ears
+    fill(92, 58, 33);
+    ellipse(x - size * 0.36, y - size * 0.36, size * 0.34);
+    ellipse(x + size * 0.36, y - size * 0.36, size * 0.34);
+    fill(150, 105, 70);
+    ellipse(x - size * 0.36, y - size * 0.36, size * 0.17);
+    ellipse(x + size * 0.36, y - size * 0.36, size * 0.17);
+
+    // Head
+    fill(110, 70, 40);
+    ellipse(x, y, size, size * 0.92);
+
+    // Muzzle and nose
+    fill(196, 156, 116);
+    ellipse(x, y + size * 0.17, size * 0.42, size * 0.32);
+    fill(35, 22, 15);
+    ellipse(x, y + size * 0.09, size * 0.14, size * 0.09);
+
+    // Eyes
+    fill(25, 15, 10);
+    ellipse(x - size * 0.19, y - size * 0.08, size * 0.08);
+    ellipse(x + size * 0.19, y - size * 0.08, size * 0.08);
+
+    // Smile
+    noFill();
+    stroke(25, 15, 10);
+    strokeWeight(size * 0.03);
+    arc(x, y + size * 0.22, size * 0.16, size * 0.1, 0, PI);
     pop();
 }
