@@ -15,10 +15,22 @@
 
 "use strict";
 
-// The first three stars of the Great Bear's tail
+// // The seven stars of the Big Dipper, the brightest part of the Great Bear
 let alkaid = undefined;
 let mizar = undefined;
 let alioth = undefined;
+let megrez = undefined;
+let phecda = undefined;
+let merak = undefined;
+let dubhe = undefined;
+
+// Other real stars nearby, there to trick you
+let alcor = undefined;
+let thuban = undefined;
+let corCaroli = undefined;
+let muscida = undefined;
+let talitha = undefined;
+let polaris = undefined;
 
 // Which star the player needs to click next (1 is the first star)
 let nextStar = 1;
@@ -33,6 +45,18 @@ function setup() {
     alkaid = makeStar(70, 175, "Alkaid", 1);
     mizar = makeStar(135, 140, "Mizar", 2);
     alioth = makeStar(195, 135, "Alioth", 3);
+    megrez = makeStar(255, 150, "Megrez", 4);
+    phecda = makeStar(262, 215, "Phecda", 5);
+    merak = makeStar(352, 222, "Merak", 6);
+    dubhe = makeStar(365, 150, "Dubhe", 7);
+
+    // Trick stars all have an order of 0, so they're never right
+    alcor = makeStar(156, 120, "Alcor", 0);
+    thuban = makeStar(95, 90, "Thuban", 0);
+    corCaroli = makeStar(160, 232, "Cor Caroli", 0);
+    muscida = makeStar(440, 100, "Muscida", 0);
+    talitha = makeStar(425, 262, "Talitha", 0);
+    polaris = makeStar(318, 95, "Polaris", 0);
 }
 
 /**
@@ -44,11 +68,25 @@ function draw() {
     // A line between each pair of stars that has been connected
     connectStars(alkaid, mizar);
     connectStars(mizar, alioth);
+    connectStars(alioth, megrez);
+    connectStars(megrez, phecda);
+    connectStars(phecda, merak);
+    connectStars(merak, dubhe);
+    // The last line closes the bowl of the dipper
+    connectStars(megrez, dubhe);
 
     drawStar(alkaid);
     drawStar(mizar);
-    drawStar(alioth);
-
+    drawStar(megrez);
+    drawStar(phecda);
+    drawStar(merak);
+    drawStar(dubhe);
+    drawStar(alcor);
+    drawStar(thuban);
+    drawStar(corCaroli);
+    drawStar(muscida);
+    drawStar(talitha);
+    drawStar(polaris);
     drawHill();
 }
 
@@ -178,6 +216,16 @@ function mousePressed() {
     checkStar(alkaid);
     checkStar(mizar);
     checkStar(alioth);
+        checkStar(megrez);
+    checkStar(phecda);
+    checkStar(merak);
+    checkStar(dubhe);
+    checkStar(alcor);
+    checkStar(thuban);
+    checkStar(corCaroli);
+    checkStar(muscida);
+    checkStar(talitha);
+    checkStar(polaris);
 }
 
 /**
