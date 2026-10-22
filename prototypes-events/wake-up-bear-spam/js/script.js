@@ -16,6 +16,15 @@
 // How awake the bear is, from 0 (deep sleep) to 100 (wide awake)
 let awake = 0;
 
+// How much each key press wakes him up
+const pressStrength = 6;
+
+// How fast he falls back asleep every frame
+const sleepSpeed = 0.6;
+
+// Counts how many keys have been pressed
+let presses = 0;
+
 /**
  * Creates the canvas
  */
@@ -24,13 +33,25 @@ function setup() {
 }
 
 /**
- * Draws the cave and the sleeping bear
+ * Lets the bear drift back to sleep, then draws the cave, the bear and the meter
  */
 function draw() {
+    // Time passing pulls him back to sleep
+    awake = max(awake - sleepSpeed, 0);
+
     drawCave();
     drawBear();
 
+    drawMeter();
     drawMessage();
+}
+
+/**
+ * Every time any key is pressed, the bear wakes up a little more
+ */
+function keyPressed() {
+    awake = min(awake + pressStrength, 100);
+    presses += 1;
 }
 
 /**
@@ -126,7 +147,26 @@ function drawZzz(x, y) {
 }
 
 /**
- * Draws a message at the top
+ * Draws the meter showing how awake the bear is
+ */
+function drawMeter() {
+    push();
+    noStroke();
+    fill(0, 0, 0, 140);
+    rect(150, 400, 300, 22, 11);
+    // The meter turns from blue (asleep) to red (awake)
+    const meterColour = lerpColor(color(90, 130, 220), color(230, 70, 50), awake / 100);
+    fill(meterColour);
+    rect(150, 400, 300 * awake / 100, 22, 11);
+    fill(255);
+    textAlign(CENTER, CENTER);
+    textSize(13);
+    text("AWAKE", width / 2, 411);
+    pop();
+}
+
+/**
+ * Draws the instructions, changing as he wakes up
  */
 function drawMessage() {
     push();
@@ -134,7 +174,17 @@ function drawMessage() {
     textAlign(CENTER, CENTER);
     fill(255);
 
-    textSize(20);
-    text("Shh... he's hibernating.", width / 2, 40);
+    if (awake === 0) {
+        textSize(20);
+        text("He's hibernating. Mash any key to wake him up.", width / 2, 40);
+    }
+    else if (awake < 50) {
+        textSize(20);
+        text("Keep going...", width / 2, 40);
+    }
+    else {
+        textSize(20);
+        text("He's stirring! Don't stop!", width / 2, 40);
+    }
     pop();
 }
