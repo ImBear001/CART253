@@ -61,6 +61,21 @@ Don't Wake Him was the one I became more interested in developing. At first, it 
 
 If I could keep developing one, I'd choose Don't Wake Him. I would turn it into a stealth game where the bear slowly learns your habits, forcing you to change your strategy every time you enter the cave. Maybe the bear isn't even the only thing you need to worry about. I think there's something funny and genuinely tense about being a tiny animal trying to steal honey from something that could wake up at any second. These prototypes showed me that the most interesting part of making a game isn't always adding more stuff; sometimes it's making a small mechanic matter.
 
+## Prototyping Events
+![Wake Up Bear Spam](prototypes-events/wake-up-bear-spam/wakeupbearspamscreenshot.png)
+![Dear Bear](prototypes-events/dear-bear/dearbearscreenshot.png)
+![Don't Leave Me](prototypes-events/dont-leave-me/Donttleavemescreenshot.png)
+
+Events are the first time it felt like the bear was actually paying attention to me. Before this, my programs just ran and you watched. Now the bear reacts to what you do, and sometimes to what you don't do.
+
+Wake Up Bear Spam is just pure button mashing. keyPressed() only fires once per press, so you can't cheat by holding a key down. You actually have to hammer it. The fun part was making him fall back asleep when you stop, because now it's a little fight between you and time. Also, my first time hitting Go Live I got a blank screen... again. Same problem as last time: a leftover template sitting in the wrong folder. Then Windows told me I needed administrator permission to delete a folder in my own project. Classic.
+
+Dear Bear was my favourite to test because people type the weirdest stuff. He just looks for words like "honey" or "bees" inside your letter. Funny bug I noticed: he checks if the letter includes "bee", so typing "I've been busy" makes him panic about bees. I kind of left it in because it makes him feel jumpy and dramatic, which fits him.
+
+Don't Leave Me surprised me the most. Switching tabs isn't even a p5 thing, it's a normal browser event, and once I used it the bear could notice when you leave and tell you exactly how many seconds you were gone. That made him feel weirdly alive and a little guilt-trippy. The assignment asked about programs "being demanding," and he is VERY demanding.
+
+If I keep going with one, it's Don't Leave Me. I'd want him to remember how many times you've left him and get more dramatic every time.
+
 ## Prototyping Functions
 ![Salmon Run](Prototypes-functions/salmon-run/salmonrunscreenshot.png)
 ![Bear Says](prototypes-functions/bear-moods/bearmoodsscreenshot.png)
