@@ -15,8 +15,17 @@
 
 "use strict";
 
-// How the bear feels: "happy" or "petted"
+// The canvas, kept so we can listen for the mouse entering and leaving it
+let canvas = undefined;
+
+// How the bear feels: "happy", "worried" or "petted"
 let mood = "happy";
+
+// How many frames the mouse has been away from the canvas
+let awayFrames = 0;
+
+// Is the mouse over the canvas right now?
+let mouseIsHere = true;
 
 // Counts down while the bear is being petted
 let moodTimer = 0;
@@ -26,10 +35,13 @@ let lookX = 0;
 let lookY = 0;
 
 /**
- * Creates the canvas
+ * Creates the canvas and starts listening for the mouse
+ * entering and leaving it
  */
 function setup() {
-    createCanvas(600, 450);
+    canvas = createCanvas(600, 450);
+    canvas.mouseOver(mouseEntered);
+    canvas.mouseOut(mouseLeft);
 }
 
 /**
@@ -44,7 +56,7 @@ function draw() {
 }
 
 /**
- * Works out the bear's mood
+ * Works out the bear's mood from where the mouse is and what just happened
  */
 function updateMood() {
     // Being petted lasts for a little while
@@ -53,7 +65,14 @@ function updateMood() {
         return;
     }
 
-    mood = "happy";
+    if (mouseIsHere) {
+        mood = "happy";
+        awayFrames = 0;
+    }
+    else {
+        mood = "worried";
+        awayFrames += 1;
+    }
 }
 
 /**
@@ -75,10 +94,27 @@ function mousePressed() {
 }
 
 /**
- * Draws the bear's warm room
+ * Called when the mouse comes back onto the canvas
+ */
+function mouseEntered() {
+    mouseIsHere = true;
+}
+
+/**
+ * Called when the mouse leaves the canvas
+ */
+function mouseLeft() {
+    mouseIsHere = false;
+}
+
+/**
+ * Draws the bear's room, which gets darker the longer you're away
  */
 function drawRoom() {
-    background("#e8c9a0");
+    const lonely = constrain(awayFrames / (60 * 5), 0, 1);
+    const warm = color("#e8c9a0");
+    const cold = color("#4a5266");
+    background(lerpColor(warm, cold, lonely));
 
     push();
     noStroke();
@@ -94,6 +130,11 @@ function drawBear(x, y, size) {
     push();
     translate(x, y);
 
+    // Worried: he shakes more the longer you're gone
+    if (mood === "worried") {
+        const shake = constrain(awayFrames / 60, 0, 5);
+        translate(random(-shake, shake), random(-shake, shake));
+    }
     // Happy and petted: he bounces
     if (mood === "happy" || mood === "petted") {
         translate(0, sin(frameCount * 0.1) * 4);
@@ -101,9 +142,14 @@ function drawBear(x, y, size) {
 
     noStroke();
 
-    // Body
+    // Body and arms
     fill(92, 58, 33);
     ellipse(0, size * 0.95, size * 1.2, size * 0.9);
+    // Arms reach out towards you when he's worried
+    if (mood === "worried") {
+        ellipse(-size * 0.7, size * 0.6, size * 0.45, size * 0.22);
+        ellipse(size * 0.7, size * 0.6, size * 0.45, size * 0.22);
+    }
 
     // Ears
     ellipse(-size * 0.36, -size * 0.36, size * 0.34);
@@ -125,7 +171,7 @@ function drawBear(x, y, size) {
 }
 
 /**
- * Draws the bear's eyes, which follow the mouse
+ * Draws the bear's eyes, which follow the mouse and fill with tears when he's upset
  */
 function drawEyes(size) {
     const eyeX = size * 0.19;
@@ -154,11 +200,18 @@ function drawEyes(size) {
         ellipse(eyeX + pupilX, eyeY + pupilY, size * 0.07);
     }
 
+    // Tears when he's been worried for a while
+    if (mood === "worried" && awayFrames > 90) {
+        fill(150, 200, 255);
+        const drip = (frameCount % 30) / 30 * size * 0.3;
+        ellipse(-eyeX, eyeY + size * 0.1 + drip, size * 0.05, size * 0.07);
+        ellipse(eyeX, eyeY + size * 0.1 + drip, size * 0.05, size * 0.07);
+    }
     pop();
 }
 
 /**
- * Draws the bear's smile and blush
+ * Draws the bear's mouth for his current mood
  */
 function drawMouth(size) {
     push();
@@ -166,12 +219,18 @@ function drawMouth(size) {
     strokeWeight(size * 0.025);
     noFill();
 
-    arc(0, size * 0.24, size * 0.16, size * 0.1, 0, PI);
-    // Blush
-    noStroke();
-    fill(235, 120, 120, 130);
-    ellipse(-size * 0.3, size * 0.08, size * 0.14, size * 0.08);
-    ellipse(size * 0.3, size * 0.08, size * 0.14, size * 0.08);
+    if (mood === "happy" || mood === "petted") {
+        arc(0, size * 0.24, size * 0.16, size * 0.1, 0, PI);
+        // Blush
+        noStroke();
+        fill(235, 120, 120, 130);
+        ellipse(-size * 0.3, size * 0.08, size * 0.14, size * 0.08);
+        ellipse(size * 0.3, size * 0.08, size * 0.14, size * 0.08);
+    }
+    else {
+        // Wobbly upset mouth
+        arc(0, size * 0.3, size * 0.16, size * 0.08, PI, TWO_PI);
+    }
     pop();
 }
 
@@ -183,6 +242,17 @@ function drawMessage() {
 
     if (mood === "petted") {
         message = "Hehe. More pets please.";
+    }
+    else if (mood === "worried") {
+        if (awayFrames < 60 * 2) {
+            message = "Wait... where are you going?";
+        }
+        else if (awayFrames < 60 * 5) {
+            message = "Hello?? Come back!!";
+        }
+        else {
+            message = "...I guess I'll just wait here. Alone.";
+        }
     }
 
     push();
@@ -198,6 +268,6 @@ function drawMessage() {
     // A hint for the player at the bottom
     fill(0, 0, 0, 120);
     textSize(13);
-    text("Move your mouse around. Click him to pet him.", width / 2, 430);
+    text("Click him to pet him. Try moving your mouse away from him.", width / 2, 430);
     pop();
 }
