@@ -3,10 +3,10 @@
  * Pippin Barr, modified by Tyler Myrans
  * 
  * The starting point for a ball-bouncing experience of
- * epic proportions! Now on a hockey rink in Canadiens colours,
- * with pucks instead of balls and a stick instead of a paddle.
- * The pucks bounce off the boards, and if one gets past your
- * stick it's dropped back in from the top.
+ * epic proportions! Now a two-player hockey game on a rink in
+ * Canadiens colours. The left player's stick follows the mouse,
+ * the right player uses the UP and DOWN arrow keys. Hit the pucks
+ * back and forth, and get one past the other player's stick to score.
  */
 
 "use strict";
@@ -19,34 +19,47 @@ const ice = "#f4f8fb";
 // Our puck
 const ball = {
     x: 300,
-    y: 20,
+    y: 150,
     width: 14,
     height: 14,
     velocity: {
-        x: 0,
-        y: 10
+        x: 5,
+        y: 2
     }
 };
 
 // Our second puck
 const ball2 = {
-    x: 150,
-    y: 60,
+    x: 300,
+    y: 100,
     width: 14,
     height: 14,
     velocity: {
-        x: 2,
-        y: 6
+        x: -4,
+        y: -3
     }
 };
 
-// Our stick
+// The left player's stick (follows the mouse)
 const paddle = {
-    x: 300,
-    y: 280,
-    width: 80,
-    height: 12
+    x: 30,
+    y: 150,
+    width: 12,
+    height: 80
 };
+
+// The right player's stick (UP and DOWN arrow keys)
+const paddle2 = {
+    x: 570,
+    y: 150,
+    width: 12,
+    height: 80,
+    speed: 7
+};
+
+// Goals scored by each player
+let leftScore = 0;
+let rightScore = 0;
 
 /**
  * Create the canvas
@@ -57,31 +70,53 @@ function setup() {
 
 
 /**
- * Move and display the pucks and stick on the rink
+ * Move and display the pucks and sticks on the rink
 */
 function draw() {
     drawRink();
 
     movePaddle(paddle);
+    movePaddleWithKeys(paddle2);
     moveBall(ball);
     moveBall(ball2);
 
     handleBounce(ball, paddle);
     handleBounce(ball2, paddle);
+    handleBounce(ball, paddle2);
+    handleBounce(ball2, paddle2);
 
     bounceOffBoards(ball);
     bounceOffBoards(ball2);
 
+    checkGoal(ball);
+    checkGoal(ball2);
+
     drawPaddle(paddle);
+    drawPaddle(paddle2);
     drawBall(ball);
     drawBall(ball2);
+    drawScore();
 }
 
 /**
- * Moves the paddle
+ * Moves the paddle up and down with the mouse
  */
 function movePaddle(paddle) {
-    paddle.x = mouseX;
+    paddle.y = constrain(mouseY, paddle.height / 2, height - paddle.height / 2);
+}
+
+/**
+ * Moves the paddle passed in up and down with the arrow keys,
+ * keeping it on the rink
+ */
+function movePaddleWithKeys(paddle) {
+    if (keyIsDown(UP_ARROW)) {
+        paddle.y -= paddle.speed;
+    }
+    if (keyIsDown(DOWN_ARROW)) {
+        paddle.y += paddle.speed;
+    }
+    paddle.y = constrain(paddle.y, paddle.height / 2, height - paddle.height / 2);
 }
 
 /**
@@ -93,38 +128,63 @@ function moveBall(ball) {
 }
 
 /**
- * Bounces the provided ball off the provided paddle
+ * Bounces the provided ball off the provided paddle,
+ * sending it back the way it came
  */
 function handleBounce(ball, paddle) {
     if (checkOverlap(ball, paddle)) {
-        ball.velocity.y *= -1;
+        if (ball.x < paddle.x) {
+            // Hit the left side of the stick, so go left
+            ball.velocity.x = -abs(ball.velocity.x);
+        }
+        else {
+            // Hit the right side of the stick, so go right
+            ball.velocity.x = abs(ball.velocity.x);
+        }
     }
 }
 
 /**
- * Bounces the puck passed in off the boards on the sides and top.
- * If it gets past the stick at the bottom, it's dropped back in at the top.
+ * Bounces the puck passed in off the top and bottom boards
  */
 function bounceOffBoards(ball) {
-    // Left and right boards
-    if (ball.x < ball.width / 2 || ball.x > width - ball.width / 2) {
-        ball.velocity.x *= -1;
-        ball.x = constrain(ball.x, ball.width / 2, width - ball.width / 2);
-    }
-    // Top boards
     if (ball.y < ball.height / 2) {
         ball.velocity.y = abs(ball.velocity.y);
     }
-    // Missed it! Drop the puck back in from the top
-    if (ball.y > height + ball.height) {
-        ball.x = random(100, width - 100);
-        ball.y = 0;
+    else if (ball.y > height - ball.height / 2) {
+        ball.velocity.y = -abs(ball.velocity.y);
     }
+}
+
+/**
+ * Checks if the puck passed in went past a stick into a goal.
+ * The other player scores and the puck is dropped back at centre ice.
+ */
+function checkGoal(ball) {
+    if (ball.x < 0) {
+        rightScore += 1;
+        faceoff(ball, 1);
+    }
+    else if (ball.x > width) {
+        leftScore += 1;
+        faceoff(ball, -1);
+    }
+}
+
+/**
+ * Drops the puck passed in at centre ice, heading towards
+ * the side passed in (1 for right, -1 for left)
+ */
+function faceoff(ball, direction) {
+    ball.x = width / 2;
+    ball.y = random(80, height - 80);
+    ball.velocity.x = random(4, 6) * direction;
+    ball.velocity.y = random(-3, 3);
 }
 
 /**
  * Draws the ice with its red centre line, blue lines,
- * faceoff circle and the boards around the edge
+ * faceoff circle, goal creases and the boards around the edge
  */
 function drawRink() {
     background(ice);
@@ -151,8 +211,17 @@ function drawRink() {
 
     // Red faceoff dots in each zone
     fill(habsRed);
-    ellipse(90, height / 2, 12);
-    ellipse(510, height / 2, 12);
+    ellipse(110, 80, 10);
+    ellipse(110, 220, 10);
+    ellipse(490, 80, 10);
+    ellipse(490, 220, 10);
+
+    // Blue goal creases at each end
+    fill(120, 160, 230, 120);
+    stroke(habsRed);
+    strokeWeight(2);
+    arc(0, height / 2, 90, 90, -HALF_PI, HALF_PI);
+    arc(width, height / 2, 90, 90, HALF_PI, PI + HALF_PI);
 
     // The boards around the rink
     noFill();
@@ -173,9 +242,9 @@ function drawPaddle(paddle) {
     fill(habsBlue);
     rect(paddle.x, paddle.y, paddle.width, paddle.height, 4);
     fill(habsRed);
-    rect(paddle.x, paddle.y, paddle.width, paddle.height * 0.5);
+    rect(paddle.x, paddle.y, paddle.width * 0.5, paddle.height);
     fill(255);
-    rect(paddle.x, paddle.y, paddle.width, paddle.height * 0.15);
+    rect(paddle.x, paddle.y, paddle.width * 0.15, paddle.height);
     pop();
 }
 
@@ -193,6 +262,21 @@ function drawBall(ball) {
     ellipse(ball.x, ball.y, ball.width, ball.height);
     fill(60);
     ellipse(ball.x - 2, ball.y - 2, ball.width * 0.4);
+    pop();
+}
+
+/**
+ * Draws each player's score at the top of their half of the rink
+ */
+function drawScore() {
+    push();
+    noStroke();
+    fill(habsBlue);
+    textAlign(CENTER, CENTER);
+    textSize(28);
+    textStyle(BOLD);
+    text(leftScore, width / 2 - 50, 30);
+    text(rightScore, width / 2 + 50, 30);
     pop();
 }
 
