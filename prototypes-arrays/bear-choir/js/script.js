@@ -37,6 +37,18 @@ let bears = [];
 // Music notes floating up from the bears who are singing
 let musicNotes = [];
 
+// The song being recorded: a list of { bear, frame } moments
+let song = [];
+
+// "idle", "recording" or "playing"
+let mode = "idle";
+
+// The frame the recording or playback started on
+let modeStart = 0;
+
+// Which moment of the song is up next during playback
+let songStep = 0;
+
 /**
  * Creates the canvas and the seven bears
  */
@@ -49,9 +61,14 @@ function setup() {
 }
 
 /**
- * Draws the stage, the bears and the floating music notes
+ * Plays back the song if it's playing, then draws the stage,
+ * the bears and the floating music notes
  */
 function draw() {
+    if (mode === "playing") {
+        playSong();
+    }
+
     drawStage();
 
     for (let i = 0; i < bears.length; i++) {
@@ -104,13 +121,20 @@ function createBear(index) {
 }
 
 /**
- * Makes the bear passed in sing his note, open his mouth
- * and send a music note floating up
+ * Makes the bear passed in sing his note, open his mouth and send
+ * a music note floating up. If we're recording, it gets added to the song.
  */
 function sing(bear) {
     bear.envelope.play(bear.voice);
     bear.singing = 20;
     musicNotes.push(createMusicNote(bear.x, bear.y - bear.size * 0.7, bear.robe));
+
+    if (mode === "recording") {
+        song.push({
+            bear: bears.indexOf(bear),
+            frame: frameCount - modeStart
+        });
+    }
 }
 
 /**
@@ -137,6 +161,21 @@ function updateMusicNote(musicNote) {
 }
 
 /**
+ * Plays the recorded song back, making each bear sing at the moment he sang
+ */
+function playSong() {
+    const now = frameCount - modeStart;
+    while (songStep < song.length && song[songStep].frame <= now) {
+        sing(bears[song[songStep].bear]);
+        songStep += 1;
+    }
+    // Once every moment has been sung, the song is over
+    if (songStep >= song.length) {
+        mode = "idle";
+    }
+}
+
+/**
  * Clicking a bear makes him sing
  */
 function mousePressed() {
@@ -151,7 +190,7 @@ function mousePressed() {
 }
 
 /**
- * The A S D F G H J keys make each bear sing
+ * The A S D F G H J keys make each bear sing, R records and P plays back
  */
 function keyPressed() {
     userStartAudio();
@@ -160,6 +199,24 @@ function keyPressed() {
         if (key === bears[i].key) {
             sing(bears[i]);
         }
+    }
+
+    if (key === "r") {
+        if (mode === "recording") {
+            mode = "idle";
+        }
+        else {
+            // Start a brand new song
+            song = [];
+            mode = "recording";
+            modeStart = frameCount;
+        }
+    }
+    else if (key === "p" && song.length > 0 && mode !== "recording") {
+        mode = "playing";
+        // Start right at the first note instead of waiting through the silence before it
+        modeStart = frameCount - song[0].frame;
+        songStep = 0;
     }
 }
 
@@ -297,14 +354,36 @@ function drawMusicNote(musicNote) {
 }
 
 /**
- * Draws the instructions at the top
+ * Draws the instructions and shows when the choir is recording or playing
  */
 function drawMessage() {
+    let message = "Click a bear or press A S D F G H J.   R to record, P to play";
+    let colour = color(255, 235, 200);
+
+    if (mode === "recording") {
+        message = "Recording... " + song.length + " notes.   Press R to stop";
+        colour = color(255, 120, 120);
+        // A blinking red dot while recording
+        if (frameCount % 40 < 20) {
+            push();
+            noStroke();
+            fill(230, 50, 50);
+            ellipse(110, 72, 14);
+            pop();
+        }
+    }
+    else if (mode === "playing") {
+        message = "The Bear Choir presents: your song";
+    }
+    else if (song.length > 0) {
+        message = "Song saved (" + song.length + " notes). Press P to hear the choir sing it";
+    }
+
     push();
     noStroke();
-    fill(255, 235, 200);
+    fill(colour);
     textAlign(CENTER, CENTER);
     textSize(16);
-    text("Click a bear or press A S D F G H J to make him sing", width / 2, 72);
+    text(message, width / 2, 72);
     pop();
 }
