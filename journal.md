@@ -90,3 +90,18 @@ Bear Says started as four buttons that changed the bear's face. It worked, but i
 The Great Bear was the refactoring one, and it was kind of a mind game. I wrote the first three stars the long, copy-paste way and the file was already 266 lines. After turning it into makeStar(), drawStar() and checkStar(), it only dropped to 233, and I was like... that's it? Then I added the other ten stars and each one was a single line. That's when it clicked. The refactor doesn't pay off right away, it pays off the next time you want more.
 
 The first version was also way too easy, so I made it meaner: trick stars (Alcor sits right next to Mizar like in the real sky, and I misclicked it constantly), a drifting sky, a sunrise timer, and a hint that vanishes after 4 seconds. If I keep going, the Little Bear is next.
+
+## Prototyping Arrays
+![Cubs Parade](prototypes-arrays/cubs-parade/cubsparadescreenshot.png)
+![Bear Choir](prototypes-arrays/bear-choir/bearchoirscreenshot.png)
+![Berry Season](prototypes-arrays/berry-season/berryseasonscreenshot.png)
+
+I kind of cheated with arrays last week in Bear Says, so going into this one I already knew they were coming for me. What I didn't know was how much easier they make everything. I wanted a whole parade of cubs, and without arrays that's cub1, cub2, cub3 until I lose my mind. With an array it's just push() every time you click and one loop handles all of them. I clicked like 50 times just to see if it would break. It didn't. Mama Bear just looked stressed.
+
+It wasn't smooth though. The first time I added cubs they all stacked on top of each other into one giant brown blob, because every single cub was chasing Mama at the same time. I had to make each cub follow the one in front of it instead, which is what actually makes it look like a parade. Then the back of the line was drawing over the front, so I flipped the loop to go backwards. Tiny fix, huge difference.
+
+Bear Choir started with Do Re Mi and it sounded like a grade 3 recorder class. I switched to a pentatonic scale and now you can literally mash the keyboard and it sounds like a real song. The recording feature is my favourite thing I've made so far, because the song is just an array remembering which bear sang and when, and the choir reads it back. For a while I was convinced the keys were broken, then realized I'd clicked into VS Code and the page didn't even have focus. Click the stage first. Learned that the dumb way.
+
+Berry Season is the one that feels alive. I don't really play it, I just plant bushes and watch bears fight over berries. Every bear checks every bush, and every bush has its own array of berries, so it's lists inside lists. Press B enough times and the forest gets wiped out in seconds, which is weirdly satisfying.
+
+If I kept going with one, it'd be Berry Season. I'd add winter, so the bears have to eat enough before they hibernate or they don't wake up in the spring. Dark, but it makes the berries matter.
