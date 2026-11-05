@@ -195,13 +195,16 @@ function mousePressed() {
 function keyPressed() {
     userStartAudio();
 
+    // Lowercase the key so it still works with Caps Lock or Shift on
+    const pressed = key.toLowerCase();
+
     for (let i = 0; i < bears.length; i++) {
-        if (key === bears[i].key) {
+        if (pressed === bears[i].key) {
             sing(bears[i]);
         }
     }
 
-    if (key === "r") {
+    if (pressed === "r") {
         if (mode === "recording") {
             mode = "idle";
         }
@@ -212,7 +215,7 @@ function keyPressed() {
             modeStart = frameCount;
         }
     }
-    else if (key === "p" && song.length > 0 && mode !== "recording") {
+    else if (pressed === "p" && song.length > 0 && mode !== "recording") {
         mode = "playing";
         // Start right at the first note instead of waiting through the silence before it
         modeStart = frameCount - song[0].frame;
