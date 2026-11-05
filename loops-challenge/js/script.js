@@ -1,9 +1,11 @@
 /**
  * Lines
  * Pippin Barr
- * Looped by Tyler Myrans
+ * Looped (and jazzed up) by Tyler Myrans
  * 
- * A series of lines across the canvas
+ * A series of lines across the canvas, over a scrolling rainbow.
+ * The vertical lines sway like tall grass, and the horizontal lines
+ * all reach out to follow your mouse.
  */
 
 "use strict";
@@ -16,9 +18,8 @@ function setup() {
 }
 
 /**
- * Draws a gradient background, then lines across the canvas with
- * increasing thickness and gradually lightening colour, then lines
- * going down the canvas that get darker
+ * Draws the rainbow background, the swaying vertical lines,
+ * and the horizontal lines that reach for the mouse
  */
 function draw() {
     drawGradient();
@@ -30,9 +31,11 @@ function draw() {
 
     // Keep drawing vertical lines until we run off the right side
     while (x <= width) {
+        // The bottom of each line sways back and forth, a little after the one before it
+        const sway = sin(frameCount * 0.04 + x * 0.02) * 30;
         stroke(shade);
         strokeWeight(weight);
-        line(x, 0, x, height);
+        line(x, 0, x + sway, height);
 
         // Move over, get lighter and get thicker for the next line
         x += 50;
@@ -45,10 +48,11 @@ function draw() {
     shade = 250;
     strokeWeight(2);
 
-    // Keep drawing horizontal lines until we run off the bottom
+    // Keep drawing lines until we run off the bottom. Each one stays fixed
+    // on the left edge while its other end reaches for the mouse
     while (y <= height) {
         stroke(shade);
-        line(0, y, width, y);
+        line(0, y, mouseX, mouseY);
 
         // Move down and get darker for the next line
         y += 50;
@@ -57,19 +61,18 @@ function draw() {
 }
 
 /**
- * Fills the background with a gradient from pink to purple
- * made out of one vertical line for every pixel across
+ * Fills the background with a rainbow that waves back and forth and
+ * scrolls across, made out of one vertical line for every pixel across
  */
 function drawGradient() {
     push();
+    colorMode(HSB);
     strokeWeight(1);
-    const left = color("pink");
-    const right = color("purple");
 
     for (let x = 0; x < width; x++) {
-        // How far across the canvas we are, from 0 to 1
-        const amount = map(x, 0, width, 0, 1);
-        stroke(lerpColor(left, right, amount));
+        // sin() makes the hue swing back and forth, and frameCount makes it scroll
+        const hue = map(sin(x * 0.015 + frameCount * 0.03), -1, 1, 0, 360);
+        stroke(hue, 60, 100);
         line(x, 0, x, height);
     }
     pop();
