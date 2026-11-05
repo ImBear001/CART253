@@ -26,8 +26,15 @@ const mama = {
 // All the cubs in the parade, in order from front to back
 let cubs = [];
 
+// Names to give the cubs
+const cubNames = ["Bubba", "Honey", "Pip", "Maple", "Biscuit", "Nugget", "Waffles", "Bean",
+    "Coco", "Teddy", "Pickles", "Muffin", "Toast", "Bramble", "Smudge", "Juniper"];
+
 // How much space each bear keeps from the one in front (scaled by their sizes)
 const followGap = 0.62;
+
+// How many frames since the mouse last moved
+let stillFrames = 0;
 
 /**
  * Creates the canvas
@@ -40,6 +47,8 @@ function setup() {
  * Moves Mama and her cubs, then draws the meadow and the whole parade
  */
 function draw() {
+    stillFrames += 1;
+
     moveMama();
     for (let i = 0; i < cubs.length; i++) {
         // Each cub follows the cub in front, and the first cub follows Mama
@@ -56,9 +65,16 @@ function draw() {
     for (let i = cubs.length - 1; i >= 0; i--) {
         drawCub(cubs[i], i);
     }
-    drawBear(mama.x, mama.y, mama.size, mama.facing, "#6e4628");
+    drawBear(mama.x, mama.y, mama.size, mama.facing, "#6e4628", isAsleep(-1));
 
     drawMessage();
+}
+
+/**
+ * Remembers that the mouse moved, so everyone wakes up
+ */
+function mouseMoved() {
+    stillFrames = 0;
 }
 
 /**
@@ -72,6 +88,7 @@ function mousePressed() {
     }
     const cub = createCub(last.x - last.size * last.facing, last.y);
     cubs.push(cub);
+    stillFrames = 0;
 }
 
 /**
@@ -84,14 +101,16 @@ function keyPressed() {
 }
 
 /**
- * Returns a brand new cub at the position passed in
+ * Returns a brand new cub at the position passed in,
+ * with a random size, fur colour and name
  */
 function createCub(x, y) {
     const cub = {
         x: x,
         y: y,
-        size: 34,
-        fur: "#8a5a34",
+        size: random(28, 42),
+        fur: random(["#8a5a34", "#a0703f", "#5e3c22", "#b98a5a", "#3b2a1f"]),
+        name: random(cubNames),
         facing: 1,
         // Each cub waddles at its own rhythm
         waddleOffset: random(0, 100)
@@ -133,18 +152,42 @@ function moveCub(cub, leader) {
 }
 
 /**
- * Draws the cub passed in, bobbing up and down as it waddles
+ * Returns true if the bear at the place in line passed in has fallen asleep.
+ * Mama (-1) falls asleep first, then each cub a little after the one before.
+ */
+function isAsleep(placeInLine) {
+    const sleepStart = 60 * 2;
+    return stillFrames > sleepStart + (placeInLine + 1) * 15;
+}
+
+/**
+ * Draws the cub passed in, with its name floating above it
  */
 function drawCub(cub, placeInLine) {
-    const bob = abs(sin(frameCount * 0.25 + cub.waddleOffset)) * -4;
-    drawBear(cub.x, cub.y + bob, cub.size, cub.facing, cub.fur);
+    const asleep = isAsleep(placeInLine);
+
+    // Cubs bob up and down as they waddle, unless they're asleep
+    let bob = 0;
+    if (!asleep) {
+        bob = abs(sin(frameCount * 0.25 + cub.waddleOffset)) * -4;
+    }
+    drawBear(cub.x, cub.y + bob, cub.size, cub.facing, cub.fur, asleep);
+
+    // Name tag
+    push();
+    noStroke();
+    fill(255, 255, 255, 200);
+    textAlign(CENTER, BOTTOM);
+    textSize(11);
+    text(cub.name, cub.x, cub.y - cub.size * 0.95 + bob);
+    pop();
 }
 
 /**
  * Draws a bear seen from the side at the position and size passed in,
- * facing left or right, in the fur colour passed in
+ * facing left or right, in the fur colour passed in, awake or asleep
  */
-function drawBear(x, y, size, facing, fur) {
+function drawBear(x, y, size, facing, fur, asleep) {
     push();
     translate(x, y);
     // Flip the drawing to face left
@@ -158,22 +201,49 @@ function drawBear(x, y, size, facing, fur) {
     const furColour = color(fur);
     fill(furColour);
 
-    // Legs
-    rect(-size * 0.45, size * 0.1, size * 0.2, size * 0.32, size * 0.08);
-    rect(size * 0.25, size * 0.1, size * 0.2, size * 0.32, size * 0.08);
-    // Body
-    ellipse(0, 0, size * 1.25, size * 0.75);
-    // Head
-    ellipse(size * 0.58, -size * 0.25, size * 0.55, size * 0.5);
-    // Ear
-    ellipse(size * 0.48, -size * 0.5, size * 0.18);
-    // Snout
-    fill(lerpColor(furColour, color(240, 210, 170), 0.5));
-    ellipse(size * 0.82, -size * 0.18, size * 0.26, size * 0.2);
-    // Nose and eye
-    fill(25, 15, 10);
-    ellipse(size * 0.93, -size * 0.2, size * 0.08);
-    ellipse(size * 0.65, -size * 0.32, size * 0.07);
+    if (asleep) {
+        // Lying down: a low round body with the head resting on the ground
+        ellipse(0, size * 0.2, size * 1.25, size * 0.55);
+        ellipse(size * 0.55, size * 0.18, size * 0.55, size * 0.48);
+        ellipse(size * 0.45, -size * 0.05, size * 0.18);
+        drawZzz(size * 0.6, -size * 0.25, size, facing);
+    }
+    else {
+        // Legs
+        rect(-size * 0.45, size * 0.1, size * 0.2, size * 0.32, size * 0.08);
+        rect(size * 0.25, size * 0.1, size * 0.2, size * 0.32, size * 0.08);
+        // Body
+        ellipse(0, 0, size * 1.25, size * 0.75);
+        // Head
+        ellipse(size * 0.58, -size * 0.25, size * 0.55, size * 0.5);
+        // Ear
+        ellipse(size * 0.48, -size * 0.5, size * 0.18);
+        // Snout
+        fill(lerpColor(furColour, color(240, 210, 170), 0.5));
+        ellipse(size * 0.82, -size * 0.18, size * 0.26, size * 0.2);
+        // Nose and eye
+        fill(25, 15, 10);
+        ellipse(size * 0.93, -size * 0.2, size * 0.08);
+        ellipse(size * 0.65, -size * 0.32, size * 0.07);
+    }
+    pop();
+}
+
+/**
+ * Draws floating Zzz next to a sleeping bear. They're flipped back
+ * so the letters never appear backwards when the bear faces left.
+ */
+function drawZzz(x, y, size, facing) {
+    push();
+    scale(facing, 1);
+    fill(255, 255, 255, 210);
+    noStroke();
+    textStyle(BOLD);
+    const bob = sin(frameCount * 0.05 + x) * 3;
+    textSize(size * 0.25);
+    text("z", x * facing, y + bob);
+    textSize(size * 0.35);
+    text("Z", x * facing + size * 0.18, y - size * 0.22 + bob);
     pop();
 }
 
@@ -228,7 +298,10 @@ function drawTree(x, y) {
  */
 function drawMessage() {
     let message = "Click to add a cub to the parade!";
-    if (cubs.length >= 40) {
+    if (isAsleep(-1)) {
+        message = "Shh... nap time.";
+    }
+    else if (cubs.length >= 40) {
         message = "MAMA BEAR DID NOT SIGN UP FOR THIS";
     }
     else if (cubs.length >= 20) {
