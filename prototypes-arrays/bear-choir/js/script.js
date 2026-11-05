@@ -17,8 +17,13 @@
 
 "use strict";
 
-// What each bear's note is called, from low to high
-const noteNames = ["Do", "Re", "Mi", "Fa", "Sol", "La", "Ti"];
+// The note each bear sings, from low to high (in Hz). These are a
+// pentatonic scale, which has no clashing notes, so any bears you
+// mash together still sound good
+const notes = [261.63, 293.66, 329.63, 392.0, 440.0, 523.25, 587.33];
+
+// The sound each bear makes when he sings, from the deep bass bear to the tiny cub
+const voices = ["Bum", "Bom", "Doo", "Dah", "La", "Lee", "Yip"];
 
 // The key that makes each bear sing
 const keys = ["a", "s", "d", "f", "g", "h", "j"];
@@ -29,25 +34,38 @@ const robeColours = ["#c0392b", "#e67e22", "#f1c40f", "#27ae60", "#2980b9", "#8e
 // The bears in the choir, created in setup()
 let bears = [];
 
+// Music notes floating up from the bears who are singing
+let musicNotes = [];
+
 /**
  * Creates the canvas and the seven bears
  */
 function setup() {
     createCanvas(600, 450);
 
-    for (let i = 0; i < noteNames.length; i++) {
+    for (let i = 0; i < notes.length; i++) {
         bears.push(createBear(i));
     }
 }
 
 /**
- * Draws the stage and every bear in the choir
+ * Draws the stage, the bears and the floating music notes
  */
 function draw() {
     drawStage();
 
     for (let i = 0; i < bears.length; i++) {
         drawBear(bears[i]);
+    }
+
+    // Go backwards so removing a note doesn't skip the next one
+    for (let i = musicNotes.length - 1; i >= 0; i--) {
+        updateMusicNote(musicNotes[i]);
+        drawMusicNote(musicNotes[i]);
+        // Remove notes once they've faded away
+        if (musicNotes[i].life <= 0) {
+            musicNotes.splice(i, 1);
+        }
     }
 
     drawMessage();
@@ -58,17 +76,91 @@ function draw() {
  * left are bigger with lower voices, bears on the right are smaller.
  */
 function createBear(index) {
-    const size = map(index, 0, noteNames.length - 1, 86, 52);
+    const size = map(index, 0, notes.length - 1, 86, 52);
+
+    // Every bear gets its own oscillator (the thing that makes the tone)
+    // and envelope (which makes the tone fade in and out like a voice)
+    const voice = new p5.Oscillator("triangle");
+    voice.freq(notes[index]);
+    voice.amp(0);
+    voice.start();
+    const envelope = new p5.Envelope();
+    envelope.setADSR(0.02, 0.2, 0.3, 0.4);
+    envelope.setRange(0.35, 0);
 
     const bear = {
         x: 90 + index * 70,
         y: 300 - size * 0.3,
         size: size,
         robe: robeColours[index],
-        noteName: noteNames[index],
-        key: keys[index]
+        sound: voices[index],
+        key: keys[index],
+        voice: voice,
+        envelope: envelope,
+        // Counts down while the bear is singing
+        singing: 0
     };
     return bear;
+}
+
+/**
+ * Makes the bear passed in sing his note, open his mouth
+ * and send a music note floating up
+ */
+function sing(bear) {
+    bear.envelope.play(bear.voice);
+    bear.singing = 20;
+    musicNotes.push(createMusicNote(bear.x, bear.y - bear.size * 0.7, bear.robe));
+}
+
+/**
+ * Returns a new music note floating up from the position passed in
+ */
+function createMusicNote(x, y, colour) {
+    const musicNote = {
+        x: x,
+        y: y,
+        colour: colour,
+        drift: random(-0.6, 0.6),
+        life: 60
+    };
+    return musicNote;
+}
+
+/**
+ * Floats the music note passed in upwards and fades it out
+ */
+function updateMusicNote(musicNote) {
+    musicNote.y -= 1.5;
+    musicNote.x += musicNote.drift + sin(musicNote.life * 0.2) * 0.6;
+    musicNote.life -= 1;
+}
+
+/**
+ * Clicking a bear makes him sing
+ */
+function mousePressed() {
+    // The browser only allows sound after the player does something
+    userStartAudio();
+
+    for (let i = 0; i < bears.length; i++) {
+        if (dist(mouseX, mouseY, bears[i].x, bears[i].y) < bears[i].size * 0.6) {
+            sing(bears[i]);
+        }
+    }
+}
+
+/**
+ * The A S D F G H J keys make each bear sing
+ */
+function keyPressed() {
+    userStartAudio();
+
+    for (let i = 0; i < bears.length; i++) {
+        if (key === bears[i].key) {
+            sing(bears[i]);
+        }
+    }
 }
 
 /**
@@ -108,13 +200,20 @@ function drawStage() {
 }
 
 /**
- * Draws the bear passed in wearing his choir robe,
- * with his note name and key underneath
+ * Draws the bear passed in wearing his choir robe, with his mouth
+ * open while he sings and his sound and key underneath
  */
 function drawBear(bear) {
     const x = bear.x;
-    const y = bear.y;
     const size = bear.size;
+
+    // He hops a little when he sings
+    let hop = 0;
+    if (bear.singing > 0) {
+        hop = -sin(map(bear.singing, 20, 0, 0, PI)) * 10;
+        bear.singing -= 1;
+    }
+    const y = bear.y + hop;
 
     push();
     noStroke();
@@ -141,23 +240,36 @@ function drawBear(bear) {
     fill(35, 22, 15);
     ellipse(x, y + size * 0.08, size * 0.13, size * 0.08);
 
-    // Eyes and a little closed mouth
-    fill(25, 15, 10);
-    ellipse(x - size * 0.18, y - size * 0.07, size * 0.08);
-    ellipse(x + size * 0.18, y - size * 0.07, size * 0.08);
-    stroke(25, 15, 10);
-    strokeWeight(size * 0.025);
-    line(x - size * 0.05, y + size * 0.26, x + size * 0.05, y + size * 0.26);
+    // Eyes: closed and happy while singing, open otherwise
+    if (bear.singing > 0) {
+        noFill();
+        stroke(25, 15, 10);
+        strokeWeight(size * 0.03);
+        arc(x - size * 0.18, y - size * 0.07, size * 0.12, size * 0.08, PI, TWO_PI);
+        arc(x + size * 0.18, y - size * 0.07, size * 0.12, size * 0.08, PI, TWO_PI);
+        // Big round singing mouth
+        noStroke();
+        fill(120, 30, 30);
+        ellipse(x, y + size * 0.26, size * 0.16, size * 0.18);
+    }
+    else {
+        fill(25, 15, 10);
+        ellipse(x - size * 0.18, y - size * 0.07, size * 0.08);
+        ellipse(x + size * 0.18, y - size * 0.07, size * 0.08);
+        stroke(25, 15, 10);
+        strokeWeight(size * 0.025);
+        line(x - size * 0.05, y + size * 0.26, x + size * 0.05, y + size * 0.26);
+    }
     pop();
 
-    // Note name and key under each bear
+    // Sound and key under each bear
     push();
     noStroke();
     textAlign(CENTER, CENTER);
     fill(255, 235, 200);
     textStyle(BOLD);
     textSize(15);
-    text(bear.noteName, x, 385);
+    text(bear.sound, x, 385);
     textStyle(NORMAL);
     textSize(12);
     fill(255, 235, 200, 160);
@@ -166,7 +278,26 @@ function drawBear(bear) {
 }
 
 /**
- * Draws the name of the show at the top
+ * Draws the music note passed in, fading out as it floats away
+ */
+function drawMusicNote(musicNote) {
+    const fade = map(musicNote.life, 0, 60, 0, 255);
+    const c = color(musicNote.colour);
+    c.setAlpha(fade);
+
+    push();
+    noStroke();
+    fill(c);
+    // The note's head and stem
+    ellipse(musicNote.x, musicNote.y, 12, 9);
+    rect(musicNote.x + 4, musicNote.y - 18, 2.5, 18);
+    // The little flag
+    triangle(musicNote.x + 6.5, musicNote.y - 18, musicNote.x + 14, musicNote.y - 12, musicNote.x + 6.5, musicNote.y - 10);
+    pop();
+}
+
+/**
+ * Draws the instructions at the top
  */
 function drawMessage() {
     push();
@@ -174,6 +305,6 @@ function drawMessage() {
     fill(255, 235, 200);
     textAlign(CENTER, CENTER);
     textSize(16);
-    text("The Bear Choir is warming up...", width / 2, 72);
+    text("Click a bear or press A S D F G H J to make him sing", width / 2, 72);
     pop();
 }
