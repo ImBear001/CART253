@@ -22,6 +22,9 @@ let bears = [];
 // All the berry bushes
 let bushes = [];
 
+// Names for the bears
+const bearNames = ["Gus", "Maple", "Boris", "Hazel", "Otto", "Fern", "Rufus", "Clover", "Bruno", "Willow"];
+
 // How many berries a full bush has
 const maxBerries = 8;
 
@@ -59,8 +62,12 @@ function draw() {
         drawBush(bushes[i]);
     }
 
-    for (let i = 0; i < bears.length; i++) {
-        drawBear(bears[i]);
+    // Draw bears higher up the screen first, so nearer bears overlap them
+    const sortedBears = bears.slice().sort(function (a, b) {
+        return a.y - b.y;
+    });
+    for (let i = 0; i < sortedBears.length; i++) {
+        drawBear(sortedBears[i]);
     }
 
     drawMessage();
@@ -96,12 +103,14 @@ function createBerry() {
 }
 
 /**
- * Returns a new bear at a random spot
+ * Returns a new bear at a random spot with the next name on the list
  */
 function createBear() {
     const bear = {
         x: random(80, width - 80),
         y: random(140, height - 60),
+        // Each new bear gets the next name on the list
+        name: bearNames[bears.length % bearNames.length],
         fur: random(["#6e4628", "#8a5a34", "#4a3020", "#a0703f"]),
         // 0 is starving, 100 is completely full
         fullness: random(40, 80),
@@ -232,6 +241,15 @@ function mousePressed() {
 }
 
 /**
+ * Pressing B lets another bear into the forest
+ */
+function keyPressed() {
+    if (key === "b" || key === "B") {
+        bears.push(createBear());
+    }
+}
+
+/**
  * Draws the forest floor and the trees along the back
  */
 function drawForest() {
@@ -276,11 +294,14 @@ function drawBush(bush) {
 }
 
 /**
- * Draws the bear passed in from the side, bobbing while he walks.
- * A bar above him shows how full he is.
+ * Draws the bear passed in from the side. His body is wider the fuller
+ * he is, he bobs while he walks and chomps while he eats. A bar above
+ * him shows how full he is.
  */
 function drawBear(bear) {
     const size = 46;
+    // Chubby when full, skinny when starving
+    const chub = map(bear.fullness, 0, 100, 0.8, 1.5);
     let bob = 0;
     if (bear.chewing === 0) {
         bob = abs(sin(frameCount * 0.2 + bear.x * 0.05)) * -2;
@@ -293,29 +314,37 @@ function drawBear(bear) {
 
     // Shadow
     fill(0, 0, 0, 40);
-    ellipse(0, size * 0.42, size * 1.2, size * 0.2);
+    ellipse(0, size * 0.42, size * 1.2 * chub, size * 0.2);
 
     const fur = color(bear.fur);
     fill(fur);
     // Legs
     rect(-size * 0.42, size * 0.1, size * 0.2, size * 0.32, 4);
     rect(size * 0.22, size * 0.1, size * 0.2, size * 0.32, 4);
-    // Body
-    ellipse(0, 0, size * 1.15, size * 0.7);
+    // Body gets rounder the fuller he is
+    ellipse(0, 0, size * 1.15 * chub, size * 0.7 * chub);
     // Head
     ellipse(size * 0.6, -size * 0.25, size * 0.55, size * 0.5);
     ellipse(size * 0.5, -size * 0.5, size * 0.18);
-    // Snout, nose and eye
+    // Snout, which opens and closes while he chews
     fill(lerpColor(fur, color(240, 210, 170), 0.5));
-    ellipse(size * 0.84, -size * 0.2, size * 0.26, size * 0.2);
+    let chomp = 0;
+    if (bear.chewing > 0) {
+        chomp = abs(sin(bear.chewing * 0.5)) * size * 0.06;
+    }
+    ellipse(size * 0.84, -size * 0.2 + chomp, size * 0.26, size * 0.2);
     fill(25, 15, 10);
-    ellipse(size * 0.95, -size * 0.22, size * 0.08);
+    ellipse(size * 0.95, -size * 0.22 + chomp, size * 0.08);
     ellipse(size * 0.67, -size * 0.32, size * 0.07);
     pop();
 
-    // Fullness bar above him
+    // Name and fullness bar above him
     push();
     noStroke();
+    textAlign(CENTER, BOTTOM);
+    textSize(11);
+    fill(255);
+    text(bear.name, bear.x, bear.y - size * 0.75);
     fill(0, 0, 0, 90);
     rect(bear.x - 18, bear.y - size * 0.72, 36, 5, 3);
     // Green when full, red when starving
@@ -342,6 +371,6 @@ function drawMessage() {
     textSize(14);
     text("Bears: " + bears.length + "    Bushes: " + bushes.length + "    Berries: " + berryCount, 12, 17);
     textAlign(RIGHT, CENTER);
-    text("Click to plant a bush", width - 12, 17);
+    text("Click to plant a bush   B for a new bear", width - 12, 17);
     pop();
 }
