@@ -17,17 +17,18 @@ function setup() {
 
 /**
  * Draws lines across the canvas with increasing thickness and
- * gradually lightening colour
+ * gradually lightening colour, then lines going down the canvas
+ * that get darker
  */
 function draw() {
     background("pink");
 
-    // Where the first line starts, its colour and its thickness
+    // Where the first vertical line starts, its colour and its thickness
     let x = 0;
     let shade = 0;
     let weight = 1;
 
-    // Keep drawing lines until we run off the canvas
+    // Keep drawing vertical lines until we run off the right side
     while (x <= width) {
         stroke(shade);
         strokeWeight(weight);
@@ -37,5 +38,20 @@ function draw() {
         x += 50;
         shade += 25;
         weight += 1;
+    }
+
+    // Now the horizontal lines, starting at the top and starting white
+    let y = 0;
+    shade = 250;
+    strokeWeight(2);
+
+    // Keep drawing horizontal lines until we run off the bottom
+    while (y <= height) {
+        stroke(shade);
+        line(0, y, width, y);
+
+        // Move down and get darker for the next line
+        y += 50;
+        shade -= 25;
     }
 }
