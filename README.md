@@ -156,3 +156,34 @@ A little bear looks up at the night sky. Find Ursa Major by clicking its seven s
 
 ### Journal
 - [Journal entry: Prototyping Functions](journal.md#prototyping-functions)
+
+## Prototyping: Arrays
+
+Three Bear Cave prototypes exploring arrays: lists that grow and shrink, arrays of objects, arrays inside arrays, and arrays that remember things.
+
+### Cubs Parade
+![Cubs Parade](prototypes-arrays/cubs-parade/cubsparadescreenshot.png)
+
+Mama Bear follows your mouse through a meadow. Click to add a cub and it joins the back of the parade, waddling after the cub in front of it. Every cub gets a random name, size and fur colour from arrays. Backspace sends the last cub home with `pop()`. Stop moving and the whole family lies down and falls asleep, one cub at a time down the line.
+
+- [Run it](https://imbear001.github.io/CART253/prototypes-arrays/cubs-parade/)
+- [Code](https://github.com/ImBear001/CART253/tree/main/prototypes-arrays/cubs-parade)
+
+### Bear Choir
+![Bear Choir](prototypes-arrays/bear-choir/bearchoirscreenshot.png)
+
+Seven bears in choir robes, from a big bass bear down to a tiny cub, each singing one note of a pentatonic scale so anything you play sounds good. Click a bear or press A S D F G H J. Press R to record and every note goes into a `song` array of which bear sang and when. Press P and the choir sings it back. Floating music notes are an array too, and `splice()` removes them as they fade. Turn your sound on.
+
+- [Run it](https://imbear001.github.io/CART253/prototypes-arrays/bear-choir/)
+- [Code](https://github.com/ImBear001/CART253/tree/main/prototypes-arrays/bear-choir)
+
+### Berry Season
+![Berry Season](prototypes-arrays/berry-season/berryseasonscreenshot.png)
+
+A little forest that runs itself. Bears get hungry, loop through the whole `bushes` array to find the nearest bush that still has berries, and eat until they're full. Every bush has its own `berries` array that gets picked bare and slowly grows back. Full bears get chubby, starving bears get skinny. Click to plant a bush, press B to let another bear in.
+
+- [Run it](https://imbear001.github.io/CART253/prototypes-arrays/berry-season/)
+- [Code](https://github.com/ImBear001/CART253/tree/main/prototypes-arrays/berry-season)
+
+### Journal
+- [Journal entry: Prototyping Arrays](journal.md#prototyping-arrays)
