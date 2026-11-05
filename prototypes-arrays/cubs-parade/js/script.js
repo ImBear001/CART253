@@ -23,6 +23,12 @@ const mama = {
     facing: 1
 };
 
+// All the cubs in the parade, in order from front to back
+let cubs = [];
+
+// How much space each bear keeps from the one in front (scaled by their sizes)
+const followGap = 0.62;
+
 /**
  * Creates the canvas
  */
@@ -31,15 +37,66 @@ function setup() {
 }
 
 /**
- * Moves Mama, then draws the meadow and Mama
+ * Moves Mama and her cubs, then draws the meadow and the whole parade
  */
 function draw() {
     moveMama();
+    for (let i = 0; i < cubs.length; i++) {
+        // Each cub follows the cub in front, and the first cub follows Mama
+        let leader = mama;
+        if (i > 0) {
+            leader = cubs[i - 1];
+        }
+        moveCub(cubs[i], leader);
+    }
 
     drawMeadow();
+
+    // Draw from the back of the line to the front so the front overlaps
+    for (let i = cubs.length - 1; i >= 0; i--) {
+        drawCub(cubs[i], i);
+    }
     drawBear(mama.x, mama.y, mama.size, mama.facing, "#6e4628");
 
     drawMessage();
+}
+
+/**
+ * Clicking adds a new cub to the end of the parade
+ */
+function mousePressed() {
+    // The new cub starts just behind whoever is last in line
+    let last = mama;
+    if (cubs.length > 0) {
+        last = cubs[cubs.length - 1];
+    }
+    const cub = createCub(last.x - last.size * last.facing, last.y);
+    cubs.push(cub);
+}
+
+/**
+ * Pressing BACKSPACE sends the last cub home
+ */
+function keyPressed() {
+    if (keyCode === BACKSPACE && cubs.length > 0) {
+        cubs.pop();
+    }
+}
+
+/**
+ * Returns a brand new cub at the position passed in
+ */
+function createCub(x, y) {
+    const cub = {
+        x: x,
+        y: y,
+        size: 34,
+        fur: "#8a5a34",
+        facing: 1,
+        // Each cub waddles at its own rhythm
+        waddleOffset: random(0, 100)
+    };
+    return cub;
 }
 
 /**
@@ -54,6 +111,33 @@ function moveMama() {
     if (abs(dx) > 2) {
         mama.facing = Math.sign(dx);
     }
+}
+
+/**
+ * Moves the cub passed in towards its leader, stopping a little way behind it
+ */
+function moveCub(cub, leader) {
+    // Bigger bears need more room
+    const followDistance = (leader.size + cub.size) * followGap;
+    const distance = dist(cub.x, cub.y, leader.x, leader.y);
+    if (distance > followDistance) {
+        // Move most of the way to the gap behind the leader
+        const amount = (distance - followDistance) / distance;
+        const dx = (leader.x - cub.x) * amount;
+        cub.x += dx * 0.3;
+        cub.y += (leader.y - cub.y) * amount * 0.3;
+        if (abs(dx) > 0.3) {
+            cub.facing = Math.sign(dx);
+        }
+    }
+}
+
+/**
+ * Draws the cub passed in, bobbing up and down as it waddles
+ */
+function drawCub(cub, placeInLine) {
+    const bob = abs(sin(frameCount * 0.25 + cub.waddleOffset)) * -4;
+    drawBear(cub.x, cub.y + bob, cub.size, cub.facing, cub.fur);
 }
 
 /**
@@ -140,9 +224,20 @@ function drawTree(x, y) {
 }
 
 /**
- * Draws a message at the top
+ * Draws the cub count and a message that changes as the parade grows
  */
 function drawMessage() {
+    let message = "Click to add a cub to the parade!";
+    if (cubs.length >= 40) {
+        message = "MAMA BEAR DID NOT SIGN UP FOR THIS";
+    }
+    else if (cubs.length >= 20) {
+        message = "Okay that's a LOT of cubs.";
+    }
+    else if (cubs.length > 0) {
+        message = "Lead them around! Backspace sends one home.";
+    }
+
     push();
     noStroke();
     fill(255, 255, 255, 220);
@@ -151,6 +246,12 @@ function drawMessage() {
     fill(40, 30, 20);
     textAlign(CENTER, CENTER);
     textSize(16);
-    text("Mama Bear is out for a walk. Lead her with your mouse!", width / 2, 28);
+    text(message, width / 2, 28);
+
+    textAlign(LEFT, TOP);
+    textSize(14);
+    textStyle(BOLD);
+    fill(40, 30, 20);
+    text("Cubs: " + cubs.length, 14, 60);
     pop();
 }
