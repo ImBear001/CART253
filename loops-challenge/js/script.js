@@ -16,12 +16,12 @@ function setup() {
 }
 
 /**
- * Draws lines across the canvas with increasing thickness and
- * gradually lightening colour, then lines going down the canvas
- * that get darker
+ * Draws a gradient background, then lines across the canvas with
+ * increasing thickness and gradually lightening colour, then lines
+ * going down the canvas that get darker
  */
 function draw() {
-    background("pink");
+    drawGradient();
 
     // Where the first vertical line starts, its colour and its thickness
     let x = 0;
@@ -54,4 +54,23 @@ function draw() {
         y += 50;
         shade -= 25;
     }
+}
+
+/**
+ * Fills the background with a gradient from pink to purple
+ * made out of one vertical line for every pixel across
+ */
+function drawGradient() {
+    push();
+    strokeWeight(1);
+    const left = color("pink");
+    const right = color("purple");
+
+    for (let x = 0; x < width; x++) {
+        // How far across the canvas we are, from 0 to 1
+        const amount = map(x, 0, width, 0, 1);
+        stroke(lerpColor(left, right, amount));
+        line(x, 0, x, height);
+    }
+    pop();
 }
