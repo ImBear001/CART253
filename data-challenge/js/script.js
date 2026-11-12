@@ -56,5 +56,5 @@ function draw() {
 function mousePressed() {
     let car = random(carData.cars);
     let dinosaur = random(dinosaurData.dinosaurs);
-    carName = car.car + " " + dinosaur;
+    carName = car + " " + dinosaur;
 }
