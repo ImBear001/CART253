@@ -56,5 +56,7 @@ function draw() {
  * Generate a new car name
  */
 function mousePressed() {
+    let dinosaur = random(dinosaurData.dinosaurs);
+    console.log(dinosaur);
 
 }
